@@ -8,9 +8,9 @@ use JiraRestApi\JiraException;
 
 class createIssue{
 	
-	//public $zephyrComparrisson;
+	public $zephyrComparrisson;
 
-	function __construct(){
+	function __construct($toCreate){
 		$this->zephyrComparrisson = new zephyrComparrisson;
 	}
 
@@ -21,7 +21,7 @@ class createIssue{
 		    $issueField = new IssueField();
 
 		    $issueField->setProjectKey($createArray['Project'])
-		                ->setSummary($createArray['Summary']
+		                ->setSummary($createArray['Summary'])
 		                ->setAssigneeName($createArray['AssigneeName'])
 		                ->setPriorityName($createArray['priority'])
 		                ->setIssueType('Test')
@@ -45,4 +45,8 @@ class createIssue{
 		}
 
 	}
+
+	function getErrors(){
+	    return 5;
+    }
 }

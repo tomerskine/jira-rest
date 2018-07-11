@@ -10,6 +10,7 @@ class ZephyrComparison{
 	// array of tests which do not yet exist in Zephyr so must be created
 	public $toCompare;
 	// array of tests which do exist in Zephyr but need to be compared for updates
+    //public $createArrayByName;
 	
 	function doComparison(){
 		existenceCheck;
@@ -20,20 +21,21 @@ class ZephyrComparison{
 	public function __construct($mftfTests, $zephyrTests) {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
+
     }
 
     function existenceCheck(){
-		foreach $mftfTests as $mftfTest{
-			if isset($mftfTest['issueId'] && array_key_exists($mftfTest['issueId'], $zephyrTests)){
+		foreach ($this->mftfTests as $mftfTest) {
+			if (isset($mftfTest['issueId'] && array_key_exists($mftfTest['issueId'], $this->zephyrTests))){
 				if $mftfTest['issueId'] == $zephyrTest['issueId'] // break;, it exists
-				$this->$createArrayById[] = $mftfTest['name'];
+				$createArrayById[] = $mftfTest['name'];
 			}
 			else if (isset($mftfTest['Title']) && isset($mftfTest['Story']) && array_key_exists(huh?)) {
-				$this->$createArrayByName[] = $mftfTest['story'].$mftfTest['title'];
+				$createArrayByName[] = $mftfTest['story'].$mftfTest['title'];
 			}
 			else{
 				// $this->$toCompare[] = $mftfTest['name'];
-				$this->$mismatches[] = testDataComparison($mftfTest, $zephyrTests[$mftfTest])
+				$mismatches[] = testDataComparison($mftfTest, $zephyrTests[$mftfTest])
 
 			}
 		}	
@@ -78,7 +80,7 @@ class ZephyrComparison{
 		return $this->$toCompare;
 	}
 
-	function keys_are_equal($potentialUpdate, $zephyrTests) {
-		return !array_diff_key($array1, $array2) && !array_diff_key($array2, $array1);
-	}
+//	function keys_are_equal($potentialUpdate, $zephyrTests) {
+//		return !array_diff_key($array1, $array2) && !array_diff_key($array2, $array1);
+//	}
 }

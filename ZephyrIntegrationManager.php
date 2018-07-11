@@ -20,8 +20,11 @@ class ZephyrIntegrationManager {
      */
 	private $project = ''; //need to hardcode project to operate against. Is it by Fullname, Code, or integer?
 
-	public function synchronizeZephyr() {
-		$zephyrTests = new GetZephyr();
+	public function synchronizeZephyr($project) {
+		$getZephyr = new GetZephyr();
+		$zephyrTestList= $getZephyr->getIssuesByProject($project);
+		$zephyrTests = $getZephyr->getAllZephyrTests($zephyrTestList);
+		// TODO: Will getZephyr manage the querying, looping, and parsing return to create array of Ids or objects?
 		$mftfTests = new ParseMFTF();
 
 		$zephyrComparison = new ZephyrComparison($zephyrTests, $mftfTests);
@@ -31,7 +34,7 @@ class ZephyrIntegrationManager {
 		$toCreate = $zephyrComparison->getCreateArray();
 		$toUpdate = $zephyrComparison->getUpdateArray();
 		$created = new CreateIssue($toCreate);
-		$updated = new UpdateIssue($toUpdate)
+		$updated = new UpdateIssue($toUpdate);
 		$createErrors = $created->getErrors();
 		$updateErrors = $updated->getErrors();
 		// Write $created, $updated, $createErrors, and $updateErrors to file (or var_dump for now)
