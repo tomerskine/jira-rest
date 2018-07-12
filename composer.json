@@ -1,5 +1,13 @@
 {
+  "repositories": [
+    {
+      "type" : "vcs",
+      "url" : "/users/terskine/repos/magento2-functional-testing-framework"
+    }
+  ],
+
   "require": {
+    "magento/magento2-functional-testing-framework" : "*",
     "lesstif/php-jira-rest-client" : "^1.25"
   }
 }

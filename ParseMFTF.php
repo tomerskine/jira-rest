@@ -1,17 +1,17 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: terskine
- * Date: 7/10/18
- * Time: 19:53
- */
 
-//namespace JiraRestApi;
+require 'vendor/autoload.php';
+
+use Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
 
 
-class ParseMFTF
-{
+//class ParseMFTF {
 
+    function getTestObjects() {
+        $testObjects = TestObjectHandler::getInstance()->getAllObjects();
+        return $testObjects;
+    }
+//}
 
-
-}
+$testObjects = getTestObjects();
+var_dump($testObjects);

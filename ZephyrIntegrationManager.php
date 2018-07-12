@@ -28,8 +28,8 @@ class ZephyrIntegrationManager {
 		$mftfTests = new ParseMFTF();
 
 		$zephyrComparison = new ZephyrComparison($zephyrTests, $mftfTests);
-		$zephyrComparison->setZephyrTests($zephyrTests);
-		$zephyrComparison->setMftfTests($mftfTests);
+		// $zephyrComparison->setZephyrTests($zephyrTests);
+		// $zephyrComparison->setMftfTests($mftfTests);
 		//make $zephyr comparison do some work
 		$toCreate = $zephyrComparison->getCreateArray();
 		$toUpdate = $zephyrComparison->getUpdateArray();

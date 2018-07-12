@@ -27,7 +27,7 @@ class ZephyrComparison{
     function existenceCheck(){
 		foreach ($this->mftfTests as $mftfTest) {
 			if (isset($mftfTest['issueId'] && array_key_exists($mftfTest['issueId'], $this->zephyrTests))){
-				if $mftfTest['issueId'] == $zephyrTest['issueId'] // break;, it exists
+				if ($mftfTest['issueId'] == $zephyrTest['issueId']) // break;, it exists
 				$createArrayById[] = $mftfTest['name'];
 			}
 			else if (isset($mftfTest['Title']) && isset($mftfTest['Story']) && array_key_exists(huh?)) {
@@ -49,7 +49,7 @@ class ZephyrComparison{
 			// Returns the mismatch aray giving key=> for mismatches
 			// That dont exist exactly in array2 as they do in array1
 			$mismatch = array_diff_assoc($mftfTest, $zephyrTest);
-			if (isset($mismatch){
+			if (isset($mismatch) {
 				return $mftfTest;
 			}
 		}

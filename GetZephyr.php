@@ -45,7 +45,7 @@ class GetZephyr{
 
 	function getIssuesByProject($project) {
         //TODO: Send JQL query and parse results
-        $jql = 'project = project  and issueType = Test and status not Manual';
+        $jql = 'project = project  and issueType = Test and status Automated';
 
         try {
             $query = new IssueService();
