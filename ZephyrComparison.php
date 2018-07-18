@@ -11,14 +11,9 @@ class ZephyrComparison{
 	public $toCompare;
 	public $createArrayById;
 	public $createArrayByName;
+	public $mismatches;
 	// array of tests which do exist in Zephyr but need to be compared for updates
     //public $createArrayByName;
-	
-	function doComparison(){
-		existenceCheck;
-		createZephyrTests;
-		updateZephyrTests;
-	}
 
 	public function __construct($mftfTests, $zephyrTests) {
 	    $this->mftfTests = $mftfTests;
@@ -26,41 +21,39 @@ class ZephyrComparison{
 
     }
 
-    function existenceCheck(){
-		foreach ($this->mftfTests as $mftfTest) {
-			if (array_key_exists($mftfTest['testCaseId'], $mftfTest) && (isset($mftfTest['testCaseId']))) {
-				if (!($mftfTest['testCaseId'] == $zephyrTest['issueId'])) {
-                    $this->createArrayById[] = $mftfTest['testCaseId'];
-                }
-			}
-			elseif (isset($mftfTest['Title']) && isset($mftfTest['Story'])) {
-                if (!($mftfTest['testCaseId'] == $zephyrTest['issueId'])) {
-                    $this->createArrayByName[] = $mftfTest['story'] . $mftfTest['title'];
-                }
-			}
-			else{
-				$mismatches[] = $this->testDataComparison($mftfTest, $zephyrTests[$mftfTest]);
+    function existenceCheck()
+    {
+        foreach ($this->mftfTests as $mftfTest) {
+            foreach ($this->zephyrTests as $zephyrTest) {
+                if (!(array_key_exists($mftfTest['testCaseId'], $zephyrTest)) && (isset($mftfTest['testCaseId']))) {
+                    if (!($mftfTest['testCaseId'] == $zephyrTest['issueId'])) {
+                        $this->createArrayById[] = $mftfTest;
+                    }
+                } elseif (isset($mftfTest['Title']) && isset($mftfTest['Story'])) {
+                    if (!($mftfTest['stories'].$mftfTest['title'] == $zephyrTest['stories'].$zephyrTest['title'])) {
+                        $this->createArrayByName[] = $mftfTest;
+                    }
+                } else {
+                    $this->mismatches[] = $mftfTest; // For any mismatch, overwrite all fields with MFTF data
+                    // $mismatches[] = $this->testDataComparison($mftfTest, $zephyrTests[$mftfTest]); // Find exact mismatch and only update those fields
 
-			}
-		}	
-	}
+                }
+            }
+        }
+    }
 
 	function testDataComparison($mftfTest, $zephyrTest){
-//			if (!array_diff_key($mftfTest, $zephyrTest)){
-//				// throw an error. This occurs if mftf and zpehyr do not have tte same keys.
-//			}
 			// check each value against the other using array_diff_assoc
-			// Returns the mismatch aray giving key=> for mismatches
+			// Returns the mismatch array giving key=> for mismatches
 			// That dont exist exactly in array2 as they do in array1
-			$mismatch = array_diff_assoc($mftfTest, $zephyrTest);
-        return $mftfTest;
+			$mismatch[$mftfTest] = array_diff_assoc($mftfTest, $zephyrTest);
+        return $mismatch;
 		}
 
-	function makeZephyrUpdates($mismatches){
-		foreach ($mismatches as $mftfUpdateData) {
-			updateIssue::updateIssue($mftfUpdateData);
-		}
-	}
+//	function makeZephyrUpdates($mismatches){
+//		foreach ($mismatches as $mftfUpdateData) {
+//			updateIssue::updateIssue($mftfUpdateData);
+//		}
 
 	function setZephyrTests($zephyrTests){
 	    $this->zephyrTests = $zephyrTests;
@@ -70,23 +63,21 @@ class ZephyrComparison{
 	    $this->mftfTests = $mftfTests;
     }
 
-	function getCreateArrayByName(){
+	function getCreateArrayById(){
 		return $this->createArrayById;
 	}
 
-	function getCreateArrayByName() {
-	    return $this->createArrayByName;
+	function getCreateArrayByName()
+    {
+        return $this->createArrayByName;
     }
 
     function getUpdateArray(){
-        return $this->$updatesArray;
+        return $this->mismatches;
     }
-
-	function gettoCompare(){
-		return $this->$toCompare;
-	}
-
-//	function keys_are_equal($potentialUpdate, $zephyrTests) {
-//		return !array_diff_key($array1, $array2) && !array_diff_key($array2, $array1);
+//
+//	function gettoCompare(){
+//		return $this->$toCompare;
 //	}
+
 }

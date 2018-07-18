@@ -18,17 +18,21 @@ class ZephyrIntegrationManager {
      *
      * @var string
      */
-	private $project = ''; //need to hardcode project to operate against. Is it by Fullname, Code, or integer?
+	private $project = 'MC'; //same as JQL search
 
 	public function synchronizeZephyr($project) {
 		$getZephyr = new GetZephyr();
-		$zephyrTestList= $getZephyr->getIssuesByProject($project);
-		$zephyrTests = $getZephyr->getAllZephyrTests($zephyrTestList);
+		$zephyrTestList= $getZephyr->prototypeGetIssuesByProject();
+		$zephyrTests = $getZephyr->prototypeGetAllZephyrTests();
 		// TODO: Will getZephyr manage the querying, looping, and parsing return to create array of Ids or objects?
-		$mftfTests = new ParseMFTF();
+
+		$protoypeArrays = new GetPrototypeArrays;
+		$mftfTests = $protoypeArrays->getMatchingArray();
+		//$mftfTests = $protoypeArrays->getNoTestCaseIDArray(); // Uncomment for: No testCaseID BUT has match on story title
+        //$mftfTests = $prototypeArrays->getNewTestArray();     // Uncomment for: MFTF test is new and will be created
 
 		$zephyrComparison = new ZephyrComparison($zephyrTests, $mftfTests);
-		$toCreate = $zephyrComparison->getCreateArray();
+		$toCreate = $zephyrComparison->getCreateArrayById();
 		$toUpdate = $zephyrComparison->getUpdateArray();
 		$created = new CreateIssue($toCreate);
 		$updated = new UpdateIssue($toUpdate);

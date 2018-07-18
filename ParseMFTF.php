@@ -1,8 +1,8 @@
 <?php
 
-include __DIR__ . '/../autoload.php';
+require(__DIR__ . "/../../../vendor/autoload.php");
 
-use \vendor\Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
+use \Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
 
 
 class ParseMFTF {
@@ -38,3 +38,37 @@ var_dump($testObjects);
 //        return $testObjects;
 //    }
 //}
+
+
+class GetPrototypeArrays {
+
+    public function getMatchingArray() {
+        $mftfTests = ["features" => "prototypeFeature", "stories" => "prototypeStory", "title" => "prototypeTitle", "description" => "prototypeDescription", "testCaseId" => "TOM-123"];
+        return $mftfTests;
+    }
+    public function getNoTestCaseIDArray() {
+        $mftfTests = ["features" => "prototypeFeature", "stories" => "prototypeStory", "title" => "prototypeTitle", "description" => "prototypeDescription"];
+        return $mftfTests;
+    }
+
+    public function getNewTestArray() {
+        $mftfTests = ["features" => "prototypeFeatureNEW", "stories" => "prototypeStoryNEW", "title" => "prototypeTitleNEW", "description" => "prototypeDescriptionNEW"];
+        return $mftfTests;
+    }
+}
+
+
+$autoload = require(__DIR__ . "/../../../vendor/autoload.php");
+$testGen = TestObjectHandler::getInstance()->getAllObjects();
+//$catIds = array_column($testGen, 'id');
+//$catIdsmap = array_map(create_function('$o', 'return $o->id;'), $testGen);
+$catIdsmap = array_map(function($o) { return $o->annotations; }, $testGen);
+var_dump($catIdsmap);
+
+// Find MFTF (via vendor or otherwise)
+// Load _bootstrap.php (mftf/M/F/_bootstrap.php (should be able to detect where youre running it from
+// call testObejctHandler, get object back for use
+//$testObjects = ParseMFTF::getTestObjects();
+//var_dump($testObjects);
+
+
