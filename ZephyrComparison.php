@@ -1,6 +1,6 @@
 <?php
 
-class ZephyrComparison{
+class ZephyrComparison {
 
 	public $mftfTests;
 	// array of test objects as returned from MFTF TestObjectHandler
@@ -12,6 +12,8 @@ class ZephyrComparison{
 	public $createArrayById;
 	public $createArrayByName;
 	public $mismatches;
+	public $updateCheck;
+	public $skippedTests;
 	// array of tests which do exist in Zephyr but need to be compared for updates
     //public $createArrayByName;
 
@@ -20,6 +22,72 @@ class ZephyrComparison{
 	    $this->zephyrTests = $zephyrTests;
 
     }
+
+    public function matchOnIdOrName() {
+	    foreach ($this->mftfTests as $mftfTest) {
+	        if (isset($mftfTest['testCaseId'])) {
+	            $this->idCompare($mftfTest);
+            }
+            else {
+	            $this->storyTitleCompare($mftfTest);
+            }
+        }
+    }
+
+    public function idCompare($mftfTest)
+    {
+        $mftfTestCaseId = $mftfTest['testCaseId'][0];
+        if (!(array_key_exists($mftfTestCaseId, $this->zephyrTests))) {
+            $this->createArrayById[] = $mftfTest;
+            //Array of MFTF tests which have a TestCaseId annotation but the value does not match anything in Zephyr
+        }
+        else {
+            $this->updateCheck[] = $mftfTest;
+        }
+    }
+
+    public function storyTitleCompare($mftfTest)
+    {
+        if ((isset($mftfTest['stories'])) && (isset($mftfTest['title']))) {
+            $mftfStoryTitle = $mftfTest['stories'][0] . $mftfTest['title'][0];
+        }
+        foreach ($this->zephyrTests as $zephyrTest) {  // BUILD THIS ARRAY ONCE ONLY IN matchOnIdOrName
+                $zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
+                }
+        if (!(array_search($mftfStoryTitle, $zephyrStoryTitle))) {
+            $this->createArrayByName[] = $mftfTest;
+        }
+        else {
+            $this->updateCheck[] = $mftfTest;
+        }
+
+    }
+
+    public function checkForSkippedTests() {
+	    foreach ($this->mftfTests as $mftfTest) {
+	        if (isset($mftfTest['skip'])) {
+	            $this->skippedTests[] = $mftfTest;
+            }
+        }
+        return $this->skippedTests;
+    }
+
+    public function simpleCompare()
+    {
+        foreach ($this->mftfTests as $mftfTest) {
+            if (array_key_exists($mftfTest['testCaseId'], $this->zephyrTests)) { //id compare - does the mftf testcase ID exist as a zephyr key
+                $this->createArrayById[] = $mftfTest['testCaseId'];
+            }
+        }
+        foreach ($this->zephyrTests as $zephyrTest) {
+            $zephyrTestCaseId = $zephyrTest['testCaseId'][0];
+            if (array_key_exists($zephyrTestCaseId, $this->mftfTests)) {
+                $this->createArrayById = $zephyrTestCaseId;
+            }
+        }
+        return $this->createArrayById;
+    }
+
 
     function existenceCheck()
     {
@@ -70,6 +138,10 @@ class ZephyrComparison{
 	function getCreateArrayByName()
     {
         return $this->createArrayByName;
+    }
+
+    function getUpdateCheck() {
+	    return $this->updateCheck;
     }
 
     function getUpdateArray(){

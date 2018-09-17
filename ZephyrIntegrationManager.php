@@ -19,21 +19,21 @@ class ZephyrIntegrationManager {
      * @var string
      */
 	private $project = 'MC'; //same as JQL search
+    private $jql = '';  // Allow invocation to directly pass jql to get Zephyr issues for match
+    //TODO: How will this work with Zephyr subset and full tests? How will we prevent CREATE against filter excluded but existing tests
 
 	public function synchronizeZephyr($project) {
 		$getZephyr = new GetZephyr();
-		$zephyrTestList= $getZephyr->prototypeGetIssuesByProject();
-		$zephyrTests = $getZephyr->prototypeGetAllZephyrTests();
+		$zephyrTests= $getZephyr->getIssuesByProject($project); // This now returns annotation array
+		//$zephyrTests = $getZephyr->getAllZephyrTests($zephyrTestList); // This is no longer needed
 		// TODO: Will getZephyr manage the querying, looping, and parsing return to create array of Ids or objects?
-
-		$protoypeArrays = new GetPrototypeArrays;
-		$mftfTests = $protoypeArrays->getMatchingArray();
-		//$mftfTests = $protoypeArrays->getNoTestCaseIDArray(); // Uncomment for: No testCaseID BUT has match on story title
-        //$mftfTests = $prototypeArrays->getNewTestArray();     // Uncomment for: MFTF test is new and will be created
+        $parseMFTF = new ParseMFTF();
+        $mftfTests = $parseMFTF->getTestObjects();
 
 		$zephyrComparison = new ZephyrComparison($zephyrTests, $mftfTests);
-		$toCreate = $zephyrComparison->getCreateArrayById();
-		$toUpdate = $zephyrComparison->getUpdateArray();
+//		$toCreate = $zephyrComparison->getCreateArrayById();
+//		$toUpdate = $zephyrComparison->getUpdateArray();
+        $createVerify = $zephyrComparison->simpleCompare(); //simpleCompare CreateArrayById
 		$created = new CreateIssue($toCreate);
 		$updated = new UpdateIssue($toUpdate);
 		$createErrors = $created->getErrors();
