@@ -66,3 +66,5 @@ $skippedTests = $zephyrComparison->checkForSkippedTests();
 $dryRunCreate = CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
 //$dryRunCreate = CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
 //print_r($dryRunCreate);
+//testing composer update
+
