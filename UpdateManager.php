@@ -28,15 +28,15 @@ class UpdateManager
                 $this->updateSkipped($id);
             }
             else {
-                $updateIssue = new UpdateIssue();
-                $reponse = $createIssue::createIssuesREST($id);
+                $updateIssue = new UpdateIssue($id);
+                $reponse = $updateIssue::updateIssueREST($id);
             }
         }
     }
 
     public function updateSkipped($id) {
-        $createIssue = new CreateIssue($id);
-        $response = $createIssue::createSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
+        $updateIssue = new UpdateIssue($id);
+        $response = $updateIssue::updateSkippedTest($id);
         return $response;
 
     }

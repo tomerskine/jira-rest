@@ -1,7 +1,7 @@
 <?php
 
 //require 'vendor/autoload.php';
-//namespace Magento\JZI;
+namespace Magento\JZI;
 
 require(__DIR__ . "/../../../vendor/autoload.php");
 
@@ -75,13 +75,15 @@ class GetZephyr {
 	public function getIssuesByProject($project) {
         //TODO: Send JQL query and parse results
         //$jql = 'project = '. $project. ' and issueType = Test and status Automated';
-        $jql = 'project = MC AND issueType = Test AND status = Automated AND reporter = treece'; //hardcoded jql to get smaller subset of TESTS
+        $jql = 'project = MC AND issueType = Test AND status = Automated AND reporter = treece';
+        $jql = 'project = MC AND issueType = Test';
         $zephyrIDs =[];
 
         try {
             $query = new IssueService();
-
-            $ret = $query->search($jql);
+            $startAt = 0;
+            $maxResults = 50000;
+            $ret = $query->search($jql, $startAt, $maxResults);
             //$data = json_decode(json_encode($ret), false); //= json_decode(json_encode($response->response->docs), true);
             //$data = json_decode(json_encode($ret), false); //= json_decode(json_encode($response->response->docs), true);
             //var_dump(get_object_vars($ret));

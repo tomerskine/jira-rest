@@ -1,5 +1,7 @@
 <?php
 
+namespace Magento\JZI;
+
 class ZephyrComparison {
 
 	public $mftfTests;
@@ -14,13 +16,18 @@ class ZephyrComparison {
 	public $mismatches;
 	public $updateCheck;
 	public $skippedTests;
+	public $zephyrStoryTitle;
+	public $updateByName;
+	public $updateById;
 	// array of tests which do exist in Zephyr but need to be compared for updates
     //public $createArrayByName;
 
 	public function __construct($mftfTests, $zephyrTests) {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
-
+        foreach ($this->zephyrTests as $zephyrTest) {
+            $this->zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
+        }
     }
 
     public function matchOnIdOrName() {
@@ -40,9 +47,10 @@ class ZephyrComparison {
         if (!(array_key_exists($mftfTestCaseId, $this->zephyrTests))) {
             $this->createArrayById[] = $mftfTest;
             //Array of MFTF tests which have a TestCaseId annotation but the value does not match anything in Zephyr
+            //TODO : Resolve this issue. Should this be passed only to the update flow?
         }
-        else {
-            $this->updateCheck[] = $mftfTest;
+        elseif (array_key_exists($mftfTestCaseId, $this->zephyrTests)) {
+            $this->updateById[] = $mftfTest; // MFTF has TCID and found a match
         }
     }
 
@@ -50,15 +58,19 @@ class ZephyrComparison {
     {
         if ((isset($mftfTest['stories'])) && (isset($mftfTest['title']))) {
             $mftfStoryTitle = $mftfTest['stories'][0] . $mftfTest['title'][0];
+            if (array_search($mftfStoryTitle, $this->zephyrStoryTitle)) {  // TODO : ARRAY SEARCH DOESNT WORK BECAUSE ZEPHYRSTORTITLE ISNT AN ARRAY
+                $this->updateByName[] = $mftfTest; // MFTF has Story Title and found a match
+                array_search($mftfStoryTitle, $this->zephyrStoryTitle);
+            }
+            else {
+                $this->createArrayByName[] = $mftfTest; // MFTF has Story Title but has not found a match
+            }
         }
-        foreach ($this->zephyrTests as $zephyrTest) {  // BUILD THIS ARRAY ONCE ONLY IN matchOnIdOrName
-                $zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
-                }
-        if (!(array_search($mftfStoryTitle, $zephyrStoryTitle))) {
-            $this->createArrayByName[] = $mftfTest;
-        }
+//        foreach ($this->zephyrTests as $zephyrTest) {  // BUILD THIS ARRAY ONCE ONLY IN matchOnIdOrName
+//                $zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
+//                }
         else {
-            $this->updateCheck[] = $mftfTest;
+            $this->updateCheck[] = $mftfTest; // TODO : LOG and handle this case - mftf test did not have both Story and Title set
         }
 
     }

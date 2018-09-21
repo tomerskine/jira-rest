@@ -1,9 +1,12 @@
 <?php
 
+namespace Magento\JZI;
+
 //TODO: clean up autoload to avoid hardcoding dir traversal
 require(__DIR__ . "/../../../../../autoload.php");
 
 use \Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
+use \Closure;
 
 class ParseMFTF {
 
@@ -18,6 +21,10 @@ class ParseMFTF {
 //                print_r($annotation['title']);
 //            }
 //        }
+        // TODO : CHECK FOR ALL REQUIRED ANNOTATIONS
+        // 1. CHECK THAT ALL ANNOTATIONS IN MFTFARRAY EXIST
+        // 2. IF NOT SET, IF POSSIBLE, SET DEFAULT VALUE TO WRITE TO ZEPHYR. LOG ERROR AND DEFAULT WRITE.
+        // 3. IF NOT SET AND NOT POSSIBLE, LOG ERROR AS UNWRITEABLE
         return $annotations;
     }
 }

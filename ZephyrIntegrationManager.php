@@ -1,5 +1,7 @@
 <?php
 
+namespace Magento\JZI;
+
 class ZephyrIntegrationManager {
 	/**
 	*Purpose of Manager
@@ -30,14 +32,21 @@ class ZephyrIntegrationManager {
         $parseMFTF = new ParseMFTF();
         $mftfTests = $parseMFTF->getTestObjects();
 
-		$zephyrComparison = new ZephyrComparison($zephyrTests, $mftfTests);
+		$zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
 //		$toCreate = $zephyrComparison->getCreateArrayById();
 //		$toUpdate = $zephyrComparison->getUpdateArray();
-        $createVerify = $zephyrComparison->simpleCompare(); //simpleCompare CreateArrayById
-		$created = new CreateIssue($toCreate);
-		$updated = new UpdateIssue($toUpdate);
-		$createErrors = $created->getErrors();
-		$updateErrors = $updated->getErrors();
+        $createVerify = $zephyrComparison->matchOnIdOrName();
+        $createById =$zephyrComparison->getCreateArrayById();
+        $createByName = $zephyrComparison->getCreateArrayByName();
+        $skippedTests = $zephyrComparison->checkForSkippedTests();//simpleCompare CreateArrayById
+
+        $createManager = CreateManager::getInstance()->performCreateOperations($createByName, $createById, $skippedTests);
+        $createResponse = $createManager->getResponses();
+
+//		$created = new CreateIssue($toCreate);
+//		$updated = new UpdateIssue($toUpdate);
+//		$createErrors = $created->getErrors();
+//		$updateErrors = $updated->getErrors();
 		// Write $created, $updated, $createErrors, and $updateErrors to file (or var_dump for now)
 	}
 

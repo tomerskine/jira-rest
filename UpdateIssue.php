@@ -6,6 +6,8 @@
  * Time: 10:03
  */
 
+namespace Magento\JZI;
+
 require 'vendor/autoload.php';
 
 use JiraRestApi\Issue\IssueService;
@@ -20,7 +22,7 @@ class UpdateIssue {
         $this->toUpdate = $toUpdate;
     }
 
-    function updateIssue(){
+    function updateIssueREST(){
         try{
         $issueField = new IssueField(true);
 
@@ -48,6 +50,10 @@ class UpdateIssue {
     } catch (JiraException $e) {
         $this->assertTrue(FALSE, "update Failed : " . $e->getMessage());
         }
+    }
+
+    function updateSkippedTest($test) {
+        //do skipped
     }
 
     function getErrors(){
