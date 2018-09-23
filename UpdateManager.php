@@ -41,5 +41,30 @@ class UpdateManager
 
     }
 
+    //TODO : REMOVE
+    public function performDryRunUpdateOperations($updateByName, $updateById, $skipped) {
+        //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
+        foreach ($createById as $id) {
+            // if (array_key_exists($id, $skipped)) {
+            if (isset($id['skip'])) {
+                $this->updateDryRunSkipped($id);
+            }
+            else {
+                $updateIssue = new UpdateIssue($id);
+                $response = $updateIssue::updateDryRunIssuesREST($id);
+                $createdIssueById[] = $response;
+                LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('NEW TEST sent to UPDATE: ' . $id['title'][0]);
+            }
+        }
+        return $createdIssueById;
+    }
+
+    //TODO : REMOVE
+    public function updateDryRunSkipped($id) {
+        $updateIssue = new UpdateIssue($id);
+        LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('SKIPPED TEST sent to UPDATE: ' . $id['title'][0]);
+        //$response = $createIssue::createDryRunSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
+        //return $response;
+    }
 
 }

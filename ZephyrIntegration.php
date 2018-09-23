@@ -3,8 +3,8 @@
 namespace Magento\JZI;
 
 
-require(__DIR__ . "/../../../vendor/autoload.php");
-use Magento\JZI\GetZephyr;
+//require(__DIR__ . "/../../../vendor/autoload.php");
+//use Magento\JZI\GetZephyr;
 include ('GetZephyr.php');
 include ('ParseMFTF.php');
 include ('ZephyrComparison.php');
@@ -49,7 +49,7 @@ function debugOutputArrays()
     }
 
 //function dryRunOutputs() {
-$getZephyr = new \Magento\JZI\GetZephyr();
+$getZephyr = new GetZephyr();
 $zephyrTests = $getZephyr->getIssuesByProject('MC');
 //$zephyrTests = array_slice($zephyrTests, 0, 5);
 

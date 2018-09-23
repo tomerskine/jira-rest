@@ -126,14 +126,49 @@ class ZephyrComparison {
 			// check each value against the other using array_diff_assoc
 			// Returns the mismatch array giving key=> for mismatches
 			// That dont exist exactly in array2 as they do in array1
-			$mismatch[$mftfTest] = array_diff_assoc($mftfTest, $zephyrTest);
-        return $mismatch;
+			//$mismatch[$mftfTest] = array_diff_assoc($mftfTest, $zephyrTest);
+        if (!($mftfTest['description'][0] == $zephyrTest['fields']['description'])) {
+            $this->mismatches[key($zephyrTest)]['description'] = $mftfTest['description'][0];
+        }
+        if (!($mftfTest['title'][0] == $zephyrTest['fields']['summary'])) {
+            $this->mismatches[key($zephyrTest)]['summary'] = $mftfTest['description'][0];
+        }
+        if (isset($mftfTest['severity'][0])) {
+            $mftfSeverity = $this->transformSeverity($mftfTest['severity'][0]);
+            if (!($mftfSeverity == $zephyrTest['fields']['severity'])){
+                $this->mismatches[key[$zephyrTest]['severity']] = $mftfSeverity;
+                }
+        }
+        // If mftf and zpehyrn fields are a MATCH then:
+        // 1. do NOT send that field to the UPDATE
+        // 2. Instead, remove that field entirely from the update array
+        // 3. The updateIssue will then only populate fields as issue->type('value') from the array where the key isset
 		}
 
 //	function makeZephyrUpdates($mismatches){
 //		foreach ($mismatches as $mftfUpdateData) {
 //			updateIssue::updateIssue($mftfUpdateData);
 //		}
+    public function transformSeverity($mftfSeverity) {
+        switch ($mftfSeverity) {
+            case "BLOCKER" :
+                $mftfSeverity = '0 - Blocker';
+                break;
+            case "CRITICAL" :
+                $mftfSeverity = '1 - Critical';
+                break;
+            case "MAJOR" :
+                $mftfSeverity = '2 - Major';
+                break;
+            case "AVERAGE" :
+                $mftfSeverity = '3 - Average';
+                break;
+            case "MINOR" :
+                $mftfSeverity = '4 - Minor';
+                break;
+        }
+        return $mftfSeverity;
+    }
 
 	function setZephyrTests($zephyrTests){
 	    $this->zephyrTests = $zephyrTests;
