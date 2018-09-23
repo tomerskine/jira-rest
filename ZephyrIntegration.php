@@ -33,7 +33,7 @@ function debugOutputArrays()
     $createVerify = $zephyrComparison->matchOnIdOrName();
     $createById = $zephyrComparison->getCreateArrayById();
     $createByName = $zephyrComparison->getCreateArrayByName();
-    $skippedTests = $zephyrComparison->checkForSkippedTests();
+    $skippedTests = $zephyrComparison->getSkippedTests();
     print_r($createById);
     print("***************\n****************\n*******************\n");
     print_r($createByName);

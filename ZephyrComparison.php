@@ -25,6 +25,7 @@ class ZephyrComparison {
 	public function __construct($mftfTests, $zephyrTests) {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
+	    $this->checkForSkippedTests();
         foreach ($this->zephyrTests as $zephyrTest) {
             $this->zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
         }
@@ -48,6 +49,9 @@ class ZephyrComparison {
             $this->createArrayById[] = $mftfTest;
             //Array of MFTF tests which have a TestCaseId annotation but the value does not match anything in Zephyr
             //TODO : Resolve this issue. Should this be passed only to the update flow?
+            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn($mftfTestCaseId .
+                ' exists as TestCaseId annotation but can not be found in Zephyr. 
+                No Integration functions will be run');
         }
         elseif (array_key_exists($mftfTestCaseId, $this->zephyrTests)) {
             $this->updateById[] = $mftfTest; // MFTF has TCID and found a match
@@ -66,11 +70,9 @@ class ZephyrComparison {
                 $this->createArrayByName[] = $mftfTest; // MFTF has Story Title but has not found a match
             }
         }
-//        foreach ($this->zephyrTests as $zephyrTest) {  // BUILD THIS ARRAY ONCE ONLY IN matchOnIdOrName
-//                $zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
-//                }
         else {
             $this->updateCheck[] = $mftfTest; // TODO : LOG and handle this case - mftf test did not have both Story and Title set
+            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfTest);
         }
 
     }
@@ -81,7 +83,6 @@ class ZephyrComparison {
 	            $this->skippedTests[] = $mftfTest;
             }
         }
-        return $this->skippedTests;
     }
 
     public function simpleCompare()
@@ -193,6 +194,10 @@ class ZephyrComparison {
 
     function getUpdateArray(){
         return $this->mismatches;
+    }
+
+    function getSkippedTests() {
+	    return $this->skippedTests;
     }
 //
 //	function gettoCompare(){
