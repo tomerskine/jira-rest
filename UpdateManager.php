@@ -8,6 +8,7 @@
 
 namespace Magento\JZI;
 
+include ('UpdateIssue.php');
 
 class UpdateManager
 {
@@ -44,25 +45,24 @@ class UpdateManager
     //TODO : REMOVE
     public function performDryRunUpdateOperations($updates) {
         //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
-        foreach ($updates as $update) {
+        foreach ($updates as $key => $update) {
             // if (array_key_exists($id, $skipped)) {
             if (isset($update['skip'])) {
-                $this->updateDryRunSkipped($update);
+                $this->updateDryRunSkipped($update, $key);
             }
             else {
                 $updateIssue = new UpdateIssue($update);
-                $response = $updateIssue::updateDryRunIssuesREST($id);
-                $updateIssue[] = $response;
-                LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $id['title'][0]);
+                $response = $updateIssue::updateDryRunIssuesREST($update);
+                //$updateIssue[] = $response;
+                LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
             }
         }
-        return $createdIssueById;
     }
 
     //TODO : REMOVE
-    public function updateDryRunSkipped($id) {
+    public function updateDryRunSkipped($id, $key) {
         $updateIssue = new UpdateIssue($id);
-        LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('SKIPPED TEST sent to UPDATE: ' . $id['title'][0]);
+        LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('SKIPPED TEST sent to UPDATE: ' . $key);
         //$response = $createIssue::createDryRunSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
         //return $response;
     }

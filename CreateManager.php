@@ -54,7 +54,8 @@ class CreateManager
                 $createIssue = new CreateIssue($id);
                 $response = $createIssue::createDryRunIssuesREST($id);
                 $createdIssueById[] = $response;
-                LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $id['title'][0]);
+                $mftfLoggingDescriptor = ZephyrComparison::mftfLoggingDescriptor($id);
+                LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $mftfLoggingDescriptor);
             }
         }
         return $createdIssueById;

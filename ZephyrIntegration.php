@@ -9,13 +9,15 @@ include ('GetZephyr.php');
 include ('ParseMFTF.php');
 include ('ZephyrComparison.php');
 include ('CreateManager.php');
+include ('UpdateManager.php');
+//include ('CreateIssue.php');
 
 ini_set('memory_limit', '512M');
 
 function debugOutputArrays()
 {
     $getZephyr = new \Magento\JZI\GetZephyr();
-    $zephyrTests = $getZephyr->getIssuesByProject('MC');
+    //$zephyrTests = $getZephyr->getIssuesByProject('MC');
     $zephyrTests = array_slice($zephyrTests, 0, 5);
     //print_r($zephyrTests);
     print("----------------------------\n");
@@ -48,22 +50,45 @@ function debugOutputArrays()
 //    $updateHandler = new UpdateHandler::getInstance($updates, $skippedTests)->performUpdateOperations;
     }
 
-//function dryRunOutputs() {
-$getZephyr = new GetZephyr();
-$zephyrTests = $getZephyr->getIssuesByProject('MC');
-//$zephyrTests = array_slice($zephyrTests, 0, 5);
+function dryRunOutputs()
+{
+    $getZephyr = new GetZephyr();
+    //$zephyrTests = $getZephyr->getIssuesByProject('MC');
+    //$zephyrTests = $getZephyr->jqlPagination();
+    $zephyrTests = $getZephyr->getBothProjects();
+    //$zephyrTests = array_slice($zephyrTests, 0, 5);
+
+    $parseMFTF = new ParseMFTF();
+    $mftfTests = $parseMFTF->getTestObjects();
+    //$mftfTests = array_slice($mftfTests, 1, 3);
+
+    $zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
+    $zephyrComparison->matchOnIdOrName();
+    $createById = $zephyrComparison->getCreateArrayById();
+    $createByName = $zephyrComparison->getCreateArrayByName();
+    $skippedTests = $zephyrComparison->checkForSkippedTests();
+    $mismatches = $zephyrComparison->getUpdateArray();
+
+    CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
+    UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
+}
 
 $parseMFTF = new ParseMFTF();
 $mftfTests = $parseMFTF->getTestObjects();
-//$mftfTests = array_slice($mftfTests, 1, 3);
+$mftfTest = $mftfTests[71];
 
-$zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
-$zephyrComparison->matchOnIdOrName();
-$createById = $zephyrComparison->getCreateArrayById();
-$createByName = $zephyrComparison->getCreateArrayByName();
-$skippedTests = $zephyrComparison->checkForSkippedTests();
+$createIssue = new CreateIssue($mftfTest);
+$mftfTest = $createIssue->defaultMissingFields($mftfTest);
+$mftfTest['severity'][0] = ZephyrComparison::transformSeverity($mftfTest['severity'][0]);
+//$createResponse = $createIssue->createDryRunIssuesREST($mftfTest);
+$createResponse = 'MC-4237';
+print_r($createResponse);
+print_r("\n");
 
-$dryRunCreate = CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
+$mftfUpdate = ['severity'=>'0-Blocker', 'key'=>$createResponse, 'skip'=>'MC-4236'];
+$updateResponse = UpdateIssue::updateDryRunIssuesREST($mftfUpdate);
+print_r($updateResponse);
+
 //$dryRunCreate = CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
 //print_r($dryRunCreate);
 //testing composer update

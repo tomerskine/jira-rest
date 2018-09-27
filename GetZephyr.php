@@ -76,23 +76,32 @@ class GetZephyr {
         //TODO: Send JQL query and parse results
         //$jql = 'project = '. $project. ' and issueType = Test and status Automated';
         $jql = 'project = MC AND issueType = Test AND status = Automated AND reporter = treece';
-        $jql = 'project = MC AND issueType = Test';
+        //$jql = 'project = MC AND issueType = Test AND status = Automated';
+        $jql = 'project = MAGETWO and issueType = Test';
+        $jql = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped)";
+        print_r($jql . "\n");
         $zephyrIDs =[];
 
         try {
             $query = new IssueService();
             $startAt = 0;
-            $maxResults = 50000;
-            $ret = $query->search($jql, $startAt, $maxResults);
+            $maxResults = 5;
+            $ret1 = $query->search($jql, $startAt, $maxResults);
+            $data = $this->object_to_array_recursive($ret1);
+            $startAt = 10;
+            $ret2 = $query->search($jql, $startAt, $maxResults);
+            $data2 = $this->object_to_array_recursive($ret2);
+            $retAll = array_merge($data1 , $data2);
             //$data = json_decode(json_encode($ret), false); //= json_decode(json_encode($response->response->docs), true);
             //$data = json_decode(json_encode($ret), false); //= json_decode(json_encode($response->response->docs), true);
             //var_dump(get_object_vars($ret));
-            $data = $this->object_to_array_recursive($ret, FALSE);
+            $data = $this->object_to_array_recursive($retAll, FALSE);
             //print_r($data["issues"][0]);
             foreach ($data['issues'] as $k) {
                 $zephyrIDs[$k['key']] = $k['fields']; // creates array of [1001 : MC-01, 1002 : MC-02]
             }
             if (isset($zephyrIDs)) {
+                print_r("Zephyr Tests returned: " . count($zephyrIDs) . "\n");
                 return $zephyrIDs;
             }
         } catch (JiraException $e) {
@@ -120,6 +129,64 @@ class GetZephyr {
     function prototypeGetAllZephyrTests() {
             $zephyrTests = ["features" => "prototypeFeature", "stories" => "prototypeStory", "title" => "prototypeTitle", "description" => "prototypeDescription", "testCaseId" => "TOM-123"];
             return $zephyrTests;
+    }
+
+    public function jqlPagination($jql) {
+        try {
+            $issueService = new IssueService();
+
+            //$jql = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped)";
+
+            $pagination = -1;
+
+            $startAt = 0;	//the index of the first issue to return (0-based)
+            $maxResult = 100;	// the maximum number of issues to return (defaults to 50).
+            $totalCount = -1;	// the number of issues to return
+
+            // first fetch
+            $totalRet = $issueService->search($jql, $startAt, $maxResult);
+            $totalCount = $totalRet->total;
+            $totalCount = 300;
+            $totalData = $this->object_to_array_recursive($totalRet, FALSE);
+            foreach ($totalData['issues'] as $k) {
+                $zephyrIDs[$k['key']] = $k['fields']; // creates array of [1001 : MC-01, 1002 : MC-02]
+            }
+
+            // do something with fetched data
+            foreach ($totalRet->issues as $issue) {
+                print (sprintf("%s %s \n", $issue->key, $issue->fields->summary));
+            }
+
+            // fetch remained data
+            //$page = $totalCount / $maxResult;
+
+            for ($startAt = $maxResult; $startAt < $totalCount; $startAt+=$maxResult) {
+                $ret = $issueService->search($jql, $startAt, $maxResult);
+                $data = $this->object_to_array_recursive($ret, FALSE);
+                foreach ($data['issues'] as $k) {
+                    $zephyrIDs[$k['key']] = $k['fields']; // creates array of [1001 : MC-01, 1002 : MC-02]
+                }
+                //$totalZephyrIDs = $totalZephyrIDs += $zephyrIDs;
+                print ("\nPaging $startAt\n");
+                print ("-------------------\n");
+                foreach ($ret->issues as $issue) {
+                    print (sprintf("%s %s \n", $issue->key, $issue->fields->summary));
+                }
+            }
+            Print('Hi');
+        } catch (JiraException $e) {
+            $this->assertTrue(false, 'testSearch Failed : '.$e->getMessage());
+        }
+        return $zephyrIDs;
+    }
+
+    public function getBothProjects() {
+        $jqlMAGETWO = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped)";
+        $jqlMC = "project = MC AND issueType = Test AND status = Automated";
+        $zephyrIdsMAGETWO = $this->jqlPagination($jqlMAGETWO);
+        $zephyrIdsMC = $this->jqlPagination($jqlMC);
+        $zephyrIds = array_merge($zephyrIdsMAGETWO, $zephyrIdsMC);
+        return $zephyrIds;
     }
 }
 //$getZephyr = new GetZephyr();

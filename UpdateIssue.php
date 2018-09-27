@@ -8,7 +8,7 @@
 
 namespace Magento\JZI;
 
-require 'vendor/autoload.php';
+//require 'vendor/autoload.php';
 
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\Issue\IssueField;
@@ -67,39 +67,19 @@ class UpdateIssue {
     static function updateDryRunIssuesREST($update)
     {
         $issueField = self::buildUpdateIssueField($update);
-        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . key($update);
+        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . key($update));
         // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
             self::skipTestStatusTransition($update);
             self::skipTestLinkIssue($update);
         }
-        //need to make multiple payloads for mass create issue
-        //need each test as separate array of tuple
-        // TODO : MOVE TO FUNCTION
-        $stories = (isset($test['stories'])) ? $test['stories'] : 'NO STORY';
-        $severity = (isset($test['severity'])) ? $test['severity'] : '2-major';
-        $group = 'DEFAULT GROUP VALUE'; // TODO : NEED TO AGREE ON DEFAULT VALUE - POSSIBLY CATALOG ?
+        $issueField->setIssueType("Test");
+        $issueField->setProjectKey("MC");
+        $issueService = new IssueService();
 
-
-
-        $issueField->setProjectKey('TOMERSKINE')//TODO: No project in MFTF array
-        ->setSummary($test['title'][0])// Use Title from MFTF array
-        ->setAssigneeName('tomerskine')// TODO: choose assignee
-        ->setIssueType('Test')// OK
-        ->setDescription($test['description'][0])// OK
-        // ->addVersion($test['version']) // version?
-        // ->addComponents(['', '']) // MFTF does not record Components -- TODO: is component used for reporting?
-        // set issue security if you need.
-        //->setSecurityId(10001 /* security scheme id */)
-        //->setDueDate('')
-        // 'customfield_14362', implode("', '", $test['group'])) // have to implode any customfield that will use multiple values (strings)
-        // Add custom Field mappings
-        ->addCustomField('customfield_14364', $stories)
-            ->addCustomField('customfield_14362', implode("', '", $test['group']))// have to implode any customfield that will use multiple values (strings)
-            // TODO: group value doesnt match to anything in MC. Will have to ignore and find default value from single select dropdown (like 'severity' field below)
-            ->addCustomField('customfield_12720', ['value' => $severity])// TODO: for any customfields taking LIST, need to ['value' => 'foo'] and [ ['value => 'foo'], ['value' => 'bar'] ] or multiple list selections
-        ;
-        return $issueField;
+        // You can set the $paramArray param to disable notifications in example
+        $ret = $issueService->update($update['key'], $issueField);
+        return $ret;
     }
 
     public static function buildUpdateIssueField($update) {
@@ -115,12 +95,13 @@ class UpdateIssue {
         }
         if (isset($update['severity'])) {
             $issueField->addCustomField('customfield_12720', ['value' => $update['severity']]);
+            //$issueField->addCustomField('customfield_12720', ['value' => $test['severity'][0]])
         }
         return $issueField;
     }
 
-    public function skipTestStatusTransition($update) {
-        $issueKey = key($update);
+    public static function skipTestStatusTransition($update) {
+        $issueKey = $update['key'];
         try {
             $transition = new Transition();
             $transition->setTransitionName('Skipped');
@@ -129,8 +110,11 @@ class UpdateIssue {
             $skipTransitionIssueService = new IssueService();
 
             $skipTransitionIssueService->transition($issueKey, $transition);
+            //if ($skipTransitionIssueService->http_response == 204) {
+//                print_r("\n" . "SUCCESS! " . $issueKey . " set to status SKIPPED");
+//            }
         } catch (JiraException $e) {
-            $this->assertTrue(FALSE, "add Comment Failed : " . $e->getMessage());
+            //$this->assertTrue(FALSE, "add Comment Failed : " . $e->getMessage());
         }
     }
 
@@ -138,8 +122,8 @@ class UpdateIssue {
         try {
             $il = new IssueLink();
 
-            $il->setInwardIssue(key($update))
-                ->setOutwardIssue($update['skip'])
+            $il->setInwardIssue($update['skip'])
+                ->setOutwardIssue($update['key'])
                 ->setLinkTypeName('Blocks' )
                 ->setComment('Blocking issue for Skipped test');
 

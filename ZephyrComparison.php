@@ -26,9 +26,12 @@ class ZephyrComparison {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
 	    $this->checkForSkippedTests();
-        foreach ($this->zephyrTests as $zephyrTest) { // TODO - if test doesnt have story set, it my be created bc no match. Need to exclude from CREATE bc no story to match on.
+        foreach ($this->zephyrTests as $key => $zephyrTest) { // TODO - if test doesnt have story set, it my be created bc no match. Need to exclude from CREATE bc no story to match on.
             if (isset($zephyrTest['customfield_14364'])) {
-                $this->zephyrStoryTitle[] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
+                $this->zephyrStoryTitle[$key] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
+            }
+            else {
+                $this->zephyrStoryTitle[$key] = 'NO STORY ' . $zephyrTest['summary'];
             }
         }
     }
@@ -56,7 +59,7 @@ class ZephyrComparison {
                 No Integration functions will be run');
         }
         elseif (array_key_exists($mftfTestCaseId, $this->zephyrTests)) { // If we find the MFTF TCID in Zephyr, send the MFTF test and matching zephyr test to check for updates
-            $this->testDataComparison($mftfTest, $this->zephyrTests[$mftfTestCaseId]);
+            $this->testDataComparison($mftfTest, $this->zephyrTests[$mftfTestCaseId], $mftfTestCaseId);
             $this->updateById[] = $mftfTest; // MFTF has TCID and found a match
         }
     }
@@ -72,12 +75,16 @@ class ZephyrComparison {
             }
             else {
                 // TODO - DO NOT create anything that doesnt have story set (cf_14364)
+                if (isset($mftfTest['severity'])) {
+                    $mftfTest['severity'][0] = $this->transformSeverity($mftfTest['severity'][0]);
+                }
                 $this->createArrayByName[] = $mftfTest; // MFTF has Story Title but has not found a match
             }
         }
         else {
             //$this->updateCheck[] = $mftfTest; // TODO : LOG and handle this case - mftf test did not have both Story and Title set
-            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfTest);
+            $mftfLoggingDescriptor = self::mftfLoggingDescriptor($mftfTest);
+            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfLoggingDescriptor);
         }
 
     }
@@ -90,29 +97,54 @@ class ZephyrComparison {
         }
     }
 
-	function testDataComparison($mftfTest, $zephyrTest) {
+	function testDataComparison($mftfTest, $zephyrTest, $key) {
 			// check each value against the other using array_diff_assoc
 			// Returns the mismatch array giving key=> for mismatches
 			// That dont exist exactly in array2 as they do in array1
 			//$mismatch[$mftfTest] = array_diff_assoc($mftfTest, $zephyrTest);
-        if (!($mftfTest['description'][0] == $zephyrTest['fields']['description'])) {
-            $this->mismatches[key($zephyrTest)]['description'] = $mftfTest['description'][0];
+        if (isset($mftfTest['description']) && isset($zephyrTest['description'])) {
+            if (!($mftfTest['description'][0] == $zephyrTest['description'])) {
+                $this->mismatches[$key]['description'] = $zephyrTest['description'];
+            }
         }
-        if (!($mftfTest['title'][0] == $zephyrTest['fields']['summary'])) {
-            $this->mismatches[key($zephyrTest)]['summary'] = $mftfTest['description'][0];
+        elseif (isset($mftfTest['description'])) {
+            $this->mismatches[$key]['description'] = $zephyrTest['description'];
         }
+
+       if (isset($mftfTest['title']) && isset($zephyrTest['summary'])) {
+           if (!($mftfTest['title'][0] == $zephyrTest['summary'])) {
+               $this->mismatches[$key]['summary'] = $mftfTest['title'][0];
+           }
+       }
+       elseif (isset($mftfTest['title'])){
+           $this->mismatches[$key]['summary'] = $mftfTest['title'][0];
+       }
+
         if (isset($mftfTest['severity'][0])) {
             $mftfSeverity = $this->transformSeverity($mftfTest['severity'][0]);
-            if (!($mftfSeverity == $zephyrTest['fields']['severity'])){
-                $this->mismatches[key($zephyrTest)['severity']] = $mftfSeverity;
+            if (isset($zephyrTest['customfield_12720'])){
+                if (!($mftfSeverity == $zephyrTest['customfield_12720']['value'])) {
+                    $this->mismatches[$key]['severity'] = $mftfSeverity;
                 }
+            }
+            else {
+                $this->mismatches[$key]['severity'] = $mftfSeverity;
+            }
         }
-        if (!($mftfTest['stories'][0] == $zephyrTest['fields'][customfield_14364])) {
-            $this->mismatches[key($zephyrTest)['stories']] = $mftfTest['stories'][0];
+
+        if (isset($mftfTest['stories']) && isset($zephyrTest['customfield_14364'])) {
+            if (!($mftfTest['stories'][0] == $zephyrTest['customfield_14364'])) {
+                $this->mismatches[$key]['stories'] = $mftfTest['stories'][0];
+            }
         }
+        elseif (isset($mftfTest['stories'])) {
+            $this->mismatches[$key]['stories'] = $mftfTest['stories'][0];
+        }
+
         if (isset($mftfTest['skip'])) {
-            $this->mismatches[key($zephyrTest)]['skip0'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
+            $this->mismatches[$key]['skip'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
         }
+        $this->mismatches[$key]['status'] = $zephyrTest['status']['name'];
 
 
         // If mftf and zpehyrn fields are a MATCH then:
@@ -128,22 +160,38 @@ class ZephyrComparison {
     public function transformSeverity($mftfSeverity) {
         switch ($mftfSeverity) {
             case "BLOCKER" :
-                $mftfSeverity = '0 - Blocker';
+                $mftfSeverity = '0-Blocker';
                 break;
             case "CRITICAL" :
-                $mftfSeverity = '1 - Critical';
+                $mftfSeverity = '1-Critical';
                 break;
-            case "MAJOR" :
-                $mftfSeverity = '2 - Major';
-                break;
-            case "AVERAGE" :
-                $mftfSeverity = '3 - Average';
+            case "NORMAL" :
+                $mftfSeverity = '2-Major';
                 break;
             case "MINOR" :
-                $mftfSeverity = '4 - Minor';
+                $mftfSeverity = '3-Average';
+                break;
+            case "TRIVIAL" :
+                $mftfSeverity = '4-Minor';
                 break;
         }
         return $mftfSeverity;
+    }
+
+    public static function mftfLoggingDescriptor($mftfTest) {
+        if (isset($mftfTest['testCaseId'])) {
+            $mftfLoggingDescriptor = $mftfTest['testCaseId'][0];
+        }
+        elseif (isset($mftfTest['stories']) && isset($mftfTest['title'])) {
+            $mftfLoggingDescriptor = $mftfTest['stories'][0] . $mftfTest['title'][0];
+        }
+        elseif (isset($mftfTest['title'])) {
+            $mftfLoggingDescriptor = $mftfTest['title'][0];
+        }
+        else {
+            $mftfLoggingDescriptor = 'NO STORY OR TITLE SET ON TEST';
+        }
+        return $mftfLoggingDescriptor;
     }
 
 	function setZephyrTests($zephyrTests){
