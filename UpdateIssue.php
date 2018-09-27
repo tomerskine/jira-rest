@@ -8,7 +8,7 @@
 
 namespace Magento\JZI;
 
-//require 'vendor/autoload.php';
+require_once ('../../autoload.php');
 
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\Issue\IssueField;
@@ -63,6 +63,20 @@ class UpdateIssue {
         return 5;
     }
 
+
+    static function updateRequireTransitionFields($update) {
+        $issueField = new IssueField();
+        $issueField->setIssueType("Test");
+        $issueField->setProjectKey("MC");
+        $issueField->environment = "None";
+        $issueField->resolution = "Done";
+        $issueService = new IssueService();
+
+        // You can set the $paramArray param to disable notifications in example
+        $ret = $issueService->update($update['key'], $issueField);
+        print_r('Updating reqd fields');
+        return $ret;
+    }
     // TODO : REMOVE
     static function updateDryRunIssuesREST($update)
     {
