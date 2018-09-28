@@ -146,7 +146,7 @@ class GetZephyr {
             // first fetch
             $totalRet = $issueService->search($jql, $startAt, $maxResult);
             $totalCount = $totalRet->total;
-            $totalCount = 300;
+            //$totalCount = 300;
             $totalData = $this->object_to_array_recursive($totalRet, FALSE);
             foreach ($totalData['issues'] as $k) {
                 $zephyrIDs[$k['key']] = $k['fields']; // creates array of [1001 : MC-01, 1002 : MC-02]
@@ -173,7 +173,7 @@ class GetZephyr {
                     print (sprintf("%s %s \n", $issue->key, $issue->fields->summary));
                 }
             }
-            Print('Hi');
+            Print('Finished collecting Zephyr Tests');
         } catch (JiraException $e) {
             $this->assertTrue(false, 'testSearch Failed : '.$e->getMessage());
         }
@@ -182,7 +182,7 @@ class GetZephyr {
 
     public function getBothProjects() {
         $jqlMAGETWO = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped)";
-        $jqlMC = "project = MC AND issueType = Test AND status = Automated";
+        $jqlMC = "project = MC AND issueType = Test AND status in (Automated, Skipped)";
         $zephyrIdsMAGETWO = $this->jqlPagination($jqlMAGETWO);
         $zephyrIdsMC = $this->jqlPagination($jqlMC);
         $zephyrIds = array_merge($zephyrIdsMAGETWO, $zephyrIdsMC);

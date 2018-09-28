@@ -19,13 +19,13 @@ class JZILogger extends Logger
      * @param  array  $context The log context.
      * @return void
      */
-//    public function deprecation($message, array $context = [])
-//    {
-//        $message = "DEPRECATION: " . $message;
-//        // Suppress print during unit testing
-//        if (MftfApplicationConfig::getConfig()->getPhase() !== MftfApplicationConfig::UNIT_TEST_PHASE) {
-//            print ($message . json_encode($context) . "\n");
-//        }
-//        parent::warning($message, $context);
-//    }
+    public function deprecation($message, array $context = [])
+    {
+        $message = "DEPRECATION: " . $message;
+        // Suppress print during unit testing
+        if (MftfApplicationConfig::getConfig()->getPhase() !== MftfApplicationConfig::UNIT_TEST_PHASE) {
+            print ($message . json_encode($context) . "\n");
+        }
+        parent::warning($message, $context);
+    }
 }

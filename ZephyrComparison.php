@@ -1,6 +1,7 @@
 <?php
 
 namespace Magento\JZI;
+include_once ('Util/LoggingUtil.php');
 
 class ZephyrComparison {
 
@@ -51,7 +52,7 @@ class ZephyrComparison {
     {
         $mftfTestCaseId = $mftfTest['testCaseId'][0];
         if (!(array_key_exists($mftfTestCaseId, $this->zephyrTests))) { // IF we can't find the MFTF testCaseID in the zephyr Tests array
-            $this->createArrayById[] = $mftfTest;
+            //$this->createArrayById[] = $mftfTest;
             //Array of MFTF tests which have a TestCaseId annotation but the value does not match anything in Zephyr
             //TODO : Resolve this issue. Should this be passed only to the update flow?
             LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn($mftfTestCaseId .
@@ -71,7 +72,7 @@ class ZephyrComparison {
             $storyTitleMatch = array_search($mftfStoryTitle, $this->zephyrStoryTitle);
             if (!($storyTitleMatch === false)) {
                 $this->updateByName[] = $mftfTest; // MFTF has Story Title and found a match
-                $this->testDataComparison($mftfTest, $storyTitleMatch);
+                $this->testDataComparison($mftfTest, $this->zephyrTests[$storyTitleMatch], $storyTitleMatch);
             }
             else {
                 // TODO - DO NOT create anything that doesnt have story set (cf_14364)
@@ -144,6 +145,7 @@ class ZephyrComparison {
         if (isset($mftfTest['skip'])) {
             $this->mismatches[$key]['skip'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
         }
+
         $this->mismatches[$key]['status'] = $zephyrTest['status']['name'];
 
 

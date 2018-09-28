@@ -2,6 +2,17 @@
 
 namespace Magento\JZI;
 
+//require_once ('../../autoload.php');
+use Magento\JZI\GetZephyr;
+use Magento\JZI\ParseMFTF;
+include_once ('GetZephyr.php');
+include_once ('ParseMFTF.php');
+include_once ('ZephyrComparison.php');
+include_once ('CreateManager.php');
+include_once ('UpdateManager.php');
+
+ini_set('memory_limit', '512M');
+
 class ZephyrIntegrationManager {
 	/**
 	*Purpose of Manager
@@ -54,4 +65,55 @@ class ZephyrIntegrationManager {
 	    $this->project = $project;
     }
 
+    public function runMftfZephyrIntegration($project) {
+
+	    $project = (isset($argv[1])) ? $argv[1] : "None";
+        $getZephyr = new GetZephyr();
+        $zephyrTests = $getZephyr->getBothProjects();
+
+        $parseMFTF = new ParseMFTF();
+        $mftfTests = $parseMFTF->getTestObjects();
+
+        $zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
+        $zephyrComparison->matchOnIdOrName();
+        $createById = $zephyrComparison->getCreateArrayById();
+        $createByName = $zephyrComparison->getCreateArrayByName();
+        $skippedTests = $zephyrComparison->checkForSkippedTests();
+        $mismatches = $zephyrComparison->getUpdateArray();
+
+        CreateManager::getInstance()->performDryRunCreateOperations($createByName, $createById, $skippedTests);
+        UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
+    }
+
 }
+$getZephyr = new GetZephyr();
+//$zephyrTests = $getZephyr->getBothProjects();
+$jql = "project = MC  and reporter = terskine and issuetype = Test";
+$zephyrTests = $getZephyr->jqlPagination($jql);
+$parseMFTF = new ParseMFTF();
+$mftfTestsAll = $parseMFTF->getTestObjects();
+foreach ($mftfTestsAll as $mftfTest) {
+    if (isset($mftfTest['stories'])) {
+        if ($mftfTest['stories'][0] == "JZI DEMO STORY") {
+            $mftfTests[] = $mftfTest;
+        }
+    }
+}
+$zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
+$zephyrComparison->matchOnIdOrName();
+$createById = $zephyrComparison->getCreateArrayById();
+$createByName = $zephyrComparison->getCreateArrayByName();
+$skippedTests = $zephyrComparison->checkForSkippedTests();
+$mismatches = $zephyrComparison->getUpdateArray();
+//print_r($zephyrTests['MC-4231']);
+if (isset($createByName)) {
+    CreateManager::getInstance()->performDryRunCreateOperations($createByName);
+}
+if (isset($mismatches)) {
+    UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
+}
+
+
+
+
+print_r("Finished");

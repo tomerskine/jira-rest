@@ -3,8 +3,10 @@
 namespace Magento\JZI;
 
 use Magento\JZI\LoggingUtil;
-include ('CreateIssue.php');
-include ('Util/LoggingUtil.php');
+include_once ('CreateIssue.php');
+include_once ('ZephyrComparison.php');
+include_once ('UpdateIssue.php');
+include_once ('Util/LoggingUtil.php');
 
 
 class CreateManager
@@ -43,22 +45,22 @@ class CreateManager
     }
 
     //TODO : REMOVE
-    public function performDryRunCreateOperations($createByName, $createById, $skipped) {
+    public function performDryRunCreateOperations($createByName) {
         //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
-        foreach ($createById as $id) {
+        foreach ($createByName as $id) {
             // if (array_key_exists($id, $skipped)) {
+            $createIssue = new CreateIssue($id);
+            $response = $createIssue::createDryRunIssuesREST($id);
+            $createdIssueByName[] = $response;
+            $mftfLoggingDescriptor = ZephyrComparison::mftfLoggingDescriptor($id);
+            //LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $mftfLoggingDescriptor);
+
             if (isset($id['skip'])) {
-                $this->createDryRunSkipped($id);
-            }
-            else {
-                $createIssue = new CreateIssue($id);
-                $response = $createIssue::createDryRunIssuesREST($id);
-                $createdIssueById[] = $response;
-                $mftfLoggingDescriptor = ZephyrComparison::mftfLoggingDescriptor($id);
-                LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $mftfLoggingDescriptor);
+                $id += ['key' => $reponse];
+                UpdateIssue::skipTestLinkIssue($id);
             }
         }
-        return $createdIssueById;
+        return $createdIssueByName;
     }
 
     //TODO : REMOVE

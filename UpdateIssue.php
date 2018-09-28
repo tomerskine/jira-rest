@@ -17,6 +17,8 @@ use JiraRestApi\Issue\Transition;
 use JiraRestApi\IssueLink\IssueLink;
 use JiraRestApi\IssueLink\IssueLinkService;
 
+include_once ('Util/LoggingUtil.php');
+
 class UpdateIssue {
 
     public $Update;
@@ -78,10 +80,11 @@ class UpdateIssue {
         return $ret;
     }
     // TODO : REMOVE
-    static function updateDryRunIssuesREST($update)
+    static function updateDryRunIssuesREST($update, $key)
     {
+        $update += ['key' => $key];
         $issueField = self::buildUpdateIssueField($update);
-        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . key($update));
+        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . $update['key']);
         // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
             self::skipTestStatusTransition($update);

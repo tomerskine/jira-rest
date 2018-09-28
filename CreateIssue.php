@@ -8,6 +8,8 @@ use JiraRestApi\Issue\IssueService;
 use JiraRestApi\Issue\IssueField;
 use JiraRestApi\JiraException;
 
+include_once ('TransitionIssue.php');
+
 class createIssue{
 	
 	public $test;
@@ -113,6 +115,14 @@ class createIssue{
 
         $issueService = new IssueService();
         $ret = $issueService->create($issueField);
+        LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info
+        ("DRY RUN : " . $issueField->summary . " " . $issueField->description);
+        //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("CREATED ISSUE: " . $ret->key);
+
+        // transition this newly created issue to AUTOMATED. Newly created status = "Open"
+        $status = "Open";
+        TransitionIssue::statusTransitionToAutomated($ret->key, $status);
+        //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("NEW ISSUE SET TO AUTOMATED: " . $ret-key);
         return $ret->key;
     }
 }

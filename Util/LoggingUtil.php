@@ -10,8 +10,8 @@ namespace Magento\JZI;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Magento\JZI\JZILogger;
-include ('JZILogger.php');
+//use Magento\JZI\JZILogger;
+include_once ('JZILogger.php');
 
 class LoggingUtil
 {

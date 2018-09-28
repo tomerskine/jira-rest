@@ -14,18 +14,27 @@ use JiraRestApi\Issue\IssueService;
 use JiraRestApi\Issue\IssueField;
 use JiraRestApi\JiraException;
 use JiraRestApi\Issue\Transition;
-use Magento\JZI\UpdateIssue;
-include ('UpdateIssue.php');
-include ('../../lesstif/php-jira-rest-client/src/Issue/Transition.php');
-include ('../../lesstif/php-jira-rest-client/src/Issue/IssueService.php');
+//include_once ('UpdateIssue.php');
+//include_once ('../../lesstif/php-jira-rest-client/src/Issue/Transition.php');
+//include_once ('../../lesstif/php-jira-rest-client/src/Issue/IssueService.php');
 
 class transitionIssue
 {
 
-    public static function statusTransitionToAutomated($update) {
-        $update = ['key' => 'MC-4232', 'status'=>'Review Passed'];
-        $issueKey = $update['key'];
-        $startingStatus = $update['status'];
+    /**
+     * Transitions an MC project issue to AUTOMATED status
+     *
+     * @param string $key
+     * @param string $status
+     * @return
+     * @throws JiraException $e
+     */
+    public static function statusTransitionToAutomated($key, $status) {
+//        $update = ['key' => 'MC-4232', 'status'=>'Review Passed'];
+//        $issueKey = $update['key'];
+//        $startingStatus = $update['status'];
+        $issueKey = $key;
+        $startingStatus = $status;
 
         $projectMcTransitionStates = ["Open", "In Progress", "Ready for Review", "In Review", "Review Passed", "Automated"]; //List of all transitions from Open to Automated. Skip transition handled separately.
         $currentStatusOffset = array_search($startingStatus, $projectMcTransitionStates);
@@ -60,5 +69,5 @@ class transitionIssue
 
 }
 
-$empty = [];
-TransitionIssue::statusTransitionToAutomated($empty);
+//$empty = [];
+//TransitionIssue::statusTransitionToAutomated($empty);
