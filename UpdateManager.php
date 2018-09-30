@@ -55,7 +55,7 @@ class UpdateManager
                 $updateIssue = new UpdateIssue($update);
                 $response = $updateIssue::updateDryRunIssuesREST($update, $key);
                 //$updateIssue[] = $response;
-                LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
+                //LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
 //            }
         }
     }
