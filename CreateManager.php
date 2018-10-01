@@ -24,17 +24,22 @@ class CreateManager
 
     }
 
-    public function performCreateOperations($createByName, $createById, $skipped) {
+    public function performCreateOperations($createByName) {
         //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
-        foreach ($createById as $id) {
-            if (array_key_exists($id, $skipped)) {
-                $this->createSkipped($id);
-            }
-            else {
-                $createIssue = new CreateIssue($id);
-                $reponse = $createIssue::createIssuesREST($id);
+        foreach ($createByName as $id) {
+            // if (array_key_exists($id, $skipped)) {
+            $createIssue = new CreateIssue($id);
+            $response = $createIssue::createIssuesREST($id);
+            $createdIssueByName[] = $response;
+            $mftfLoggingDescriptor = ZephyrComparison::mftfLoggingDescriptor($id);
+            //LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $mftfLoggingDescriptor);
+
+            if (isset($id['skip'])) {
+                $id += ['key' => $response];
+                //UpdateIssue::skipTestLinkIssue($id);
             }
         }
+        return $createdIssueByName;
     }
 
     public function createSkipped($id) {

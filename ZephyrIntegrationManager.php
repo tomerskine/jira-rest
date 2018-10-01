@@ -94,14 +94,16 @@ $zephyrTests = $getZephyr->jqlPagination($jql);
 //$zephyrTests = $getZephyr->getBothProjects();
 $parseMFTF = new ParseMFTF();
 $mftfTestsAll = $parseMFTF->getTestObjects();
-//foreach ($mftfTestsAll as $mftfTest) {
-//    if (isset($mftfTest['stories'])) {
-//        if ($mftfTest['stories'][0] == "JZI DEMO STORY") {
-//            $mftfTests[] = $mftfTest;
-//        }
-//    }
-//}
-$zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
+
+foreach ($mftfTestsAll as $mftfTest) {
+    if (isset($mftfTest['title'])) {
+        if ($mftfTest['title'][0] == "003 - JZI DEMO TITLE SKIP NEW") {
+            $mftfTests[] = $mftfTest;
+        }
+    }
+}
+//$zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
+$zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
 $zephyrComparison->matchOnIdOrName();
 $createById = $zephyrComparison->getCreateArrayById();
 $createByName = $zephyrComparison->getCreateArrayByName();
@@ -109,13 +111,11 @@ $skippedTests = $zephyrComparison->checkForSkippedTests();
 $mismatches = $zephyrComparison->getUpdateArray();
 //print_r($zephyrTests['MC-4231']);
 if (isset($createByName)) {
-    CreateManager::getInstance()->performDryRunCreateOperations($createByName);
+    CreateManager::getInstance()->performCreateOperations($createByName);
 }
-//if (isset($mismatches)) {
-//    UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
-//}
-
-
+if (isset($mismatches)) {
+    UpdateManager::getInstance()->performUpdateOperations($mismatches);
+}
 
 
 print_r("Finished");

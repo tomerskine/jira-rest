@@ -26,8 +26,8 @@ class UpdateManager
     public function performUpdateOperations($updates) {
         foreach ($updates as $key => $update) {
             $updateIssue = new UpdateIssue($update);
-            $response = $updateIssue::updateDryRunIssuesREST($update, $key);
-            $updateIssue[] = $response;
+            $response = $updateIssue::updateIssueREST($update, $key);
+            //$updateIssue[] = $response;
             //LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
         }
     }

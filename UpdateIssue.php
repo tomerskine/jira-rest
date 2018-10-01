@@ -69,7 +69,6 @@ class UpdateIssue {
     {
         $update += ['key' => $key];
         $issueField = self::buildUpdateIssueField($update);
-        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . $update['key']);
         // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
             self::skipTestStatusTransition($update);
@@ -77,6 +76,12 @@ class UpdateIssue {
         }
         $issueField->setIssueType("Test");
         $issueField->setProjectKey("MC");
+        $updateLogString = '';
+        foreach($update as $key=>$item) {
+            $updateLogString .= $key.':'.$item. ", \n";
+        }
+        rtrim($updateLogString, ',');
+        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . $update['key'] . " : " . $updateLogString . "\n");
         $issueService = new IssueService();
 
         // You can set the $paramArray param to disable notifications in example

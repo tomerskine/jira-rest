@@ -57,12 +57,12 @@ class createIssue{
                         ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])
                         // TODO: for any customfields taking LIST, need to ['value' => 'foo'] and [ ['value => 'foo'], ['value' => 'bar'] ] or multiple list selections
 		            ;
-			
+
 		    $issueService = new IssueService();
 
 		    $ret = $issueService->create($issueField);
 		    //$ret = $issueService->createMultiple([$issueFieldOne, $issueFieldTwo]);
-			
+
 		    //If success, Returns a link to the created issue.
 		    return $ret;
 		} catch (JiraException $e) {
@@ -95,7 +95,7 @@ class createIssue{
         $issueService = new IssueService();
         $ret = $issueService->create($issueField);
         LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info
-        ("DRY RUN : " . $issueField->summary . " " . $issueField->description);
+        ("CREATING REAL REST : " . $issueField->summary . " " . $issueField->description);
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("CREATED ISSUE: " . $ret->key);
 
         // transition this newly created issue to AUTOMATED. Newly created status = "Open"
@@ -131,7 +131,7 @@ class createIssue{
         $issueService = new IssueService();
         //$ret = $issueService->create($issueField);
         LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info
-        ("CREATING : " . $issueField->summary . " " . $issueField->description);
+        ("DRY RUN : " . $issueField->summary . " " . $issueField->description);
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("CREATED ISSUE: " . $ret->key);
 
         // transition this newly created issue to AUTOMATED. Newly created status = "Open"
