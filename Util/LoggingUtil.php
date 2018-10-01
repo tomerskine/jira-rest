@@ -81,10 +81,10 @@ class LoggingUtil
      */
     private function getLoggingPath($clazz)
     {
-        if ($clazz == UpdateIssue::class){
+        if (($clazz == UpdateIssue::class) || ($clazz == UpdateManager::class)) {
             return "log/updateIssue.log";
         }
-        elseif ($clazz == CreateIssue::class) {
+        elseif (($clazz == CreateIssue::class) || ($clazz == CreateManager::class)) {
             return "log/createIssue.log";
     }
     else {

@@ -171,8 +171,6 @@ class createIssue
 
         $issueService = new IssueService();
         $ret = $issueService->create($issueField);
-        LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info
-        ("CREATING REAL REST : " . $issueField->summary . " " . $issueField->description);
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("CREATED ISSUE: " . $ret->key);
 
         // transition this newly created issue to AUTOMATED. Newly created status = "Open"

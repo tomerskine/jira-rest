@@ -141,5 +141,6 @@ public function dryRunREST()
 
 }
 
-$finish = ZephyrIntegrationManager::m2Migration();
+//$finish = ZephyrIntegrationManager::m2Migration();
+$finish =ZephyrIntegrationManager::dryRunREST();
 print_r($finish);
