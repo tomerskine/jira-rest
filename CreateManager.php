@@ -3,6 +3,12 @@
 namespace Magento\JZI;
 
 use Magento\JZI\LoggingUtil;
+use JiraRestApi\Issue\IssueService;
+use JiraRestApi\Issue\IssueField;
+use JiraRestApi\JiraException;
+use JiraRestApi\Issue\Transition;
+use JiraRestApi\IssueLink\IssueLink;
+use JiraRestApi\IssueLink\IssueLinkService;
 include_once ('CreateIssue.php');
 include_once ('ZephyrComparison.php');
 include_once ('UpdateIssue.php');
@@ -36,7 +42,8 @@ class CreateManager
 
             if (isset($id['skip'])) {
                 $id += ['key' => $response];
-                //UpdateIssue::skipTestLinkIssue($id);
+                UpdateIssue::skipTestStatusTransition($id);
+                UpdateIssue::skipTestLinkIssue($id);
             }
         }
         return $createdIssueByName;
@@ -46,7 +53,44 @@ class CreateManager
         $createIssue = new CreateIssue($id);
         $response = $createIssue::createSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
         return $response;
+    }
 
+    public function performM2Migration($m2ZephyrTests) {
+        foreach ($m2ZephyrTests as $m2Key => $id) {
+            // if (array_key_exists($id, $skipped)) {
+            $createIssue = new CreateIssue($id);
+            $response = $createIssue::createM2Migration($id);
+            $createdIssueByName[] = $response;
+            CreateManager::m2MigrationSetIssueLink($response, $m2Key);
+            $mftfLoggingDescriptor = ZephyrComparison::mftfLoggingDescriptor($id);
+            LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('M2 Migrated: ' . $response ." : " . $m2Key);
+
+
+            if (isset($id['skip'])) {
+                $id += ['key' => $response];
+                UpdateIssue::skipTestStatusTransition($id);
+                UpdateIssue::skipTestLinkIssue($id);
+            }
+        }
+        return $createdIssueByName;
+    }
+
+    public function m2MigrationSetIssueLink($mcKey, $m2Key) {
+        try {
+            $il = new IssueLink();
+
+            $il->setInwardIssue($m2Key)
+                ->setOutwardIssue($mcKey)
+                ->setLinkTypeName('Relates' )
+                ->setComment('API Integration - Moving MAGETWO issue to MC');
+
+            $ils = new IssueLinkService();
+
+            $ret = $ils->addIssueLink($il);
+
+        } catch (JiraException $e) {
+            print("Error Occured! " . $e->getMessage());
+        }
     }
 
     //TODO : REMOVE

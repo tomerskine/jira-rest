@@ -25,12 +25,6 @@ class ZephyrIntegrationManager {
 	* 7. Log errors (TODO: manage retries)
 	*/
 
-    /**
-     * Can hardcode project or use setter
-     * This is used as part of a JQL query to filter tests to project scope
-     *
-     * @var string
-     */
 	private $project = 'MC'; //same as JQL search
     private $jql = '';  // Allow invocation to directly pass jql to get Zephyr issues for match
     //TODO: How will this work with Zephyr subset and full tests? How will we prevent CREATE against filter excluded but existing tests
@@ -53,12 +47,6 @@ class ZephyrIntegrationManager {
 
         $createManager = CreateManager::getInstance()->performCreateOperations($createByName, $createById, $skippedTests);
         $createResponse = $createManager->getResponses();
-
-//		$created = new CreateIssue($toCreate);
-//		$updated = new UpdateIssue($toUpdate);
-//		$createErrors = $created->getErrors();
-//		$updateErrors = $updated->getErrors();
-		// Write $created, $updated, $createErrors, and $updateErrors to file (or var_dump for now)
 	}
 
 	public function setProject($project) {
@@ -85,37 +73,73 @@ class ZephyrIntegrationManager {
         UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
     }
 
-}
-$getZephyr = new GetZephyr();
+
+public function realRun() {
+    $getZephyr = new GetZephyr();
 //$zephyrTests = $getZephyr->getBothProjects();
 //$jql = "project = MC  and reporter = terskine and issuetype = Test";
-$jql = "project = MC AND issueType = Test AND status in (Automated, Skipped)";
-$zephyrTests = $getZephyr->jqlPagination($jql);
+    $jql = "project = MC AND issueType = Test AND status in (Automated, Skipped)";
+    $zephyrTests = $getZephyr->jqlPagination($jql);
 //$zephyrTests = $getZephyr->getBothProjects();
-$parseMFTF = new ParseMFTF();
-$mftfTestsAll = $parseMFTF->getTestObjects();
+    $parseMFTF = new ParseMFTF();
+    $mftfTestsAll = $parseMFTF->getTestObjects();
 
-foreach ($mftfTestsAll as $mftfTest) {
-    if (isset($mftfTest['title'])) {
-        if ($mftfTest['title'][0] == "003 - JZI DEMO TITLE SKIP NEW") {
-            $mftfTests[] = $mftfTest;
+    foreach ($mftfTestsAll as $mftfTest) {
+        if (isset($mftfTest['title'])) {
+            if ($mftfTest['title'][0] == "003 - JZI DEMO TITLE SKIP NEW") {
+                $mftfTests[] = $mftfTest;
+            }
         }
     }
-}
 //$zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
-$zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
-$zephyrComparison->matchOnIdOrName();
-$createById = $zephyrComparison->getCreateArrayById();
-$createByName = $zephyrComparison->getCreateArrayByName();
-$skippedTests = $zephyrComparison->checkForSkippedTests();
-$mismatches = $zephyrComparison->getUpdateArray();
+    $zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
+    $zephyrComparison->matchOnIdOrName();
+    $createById = $zephyrComparison->getCreateArrayById();
+    $createByName = $zephyrComparison->getCreateArrayByName();
+    $skippedTests = $zephyrComparison->checkForSkippedTests();
+    $mismatches = $zephyrComparison->getUpdateArray();
 //print_r($zephyrTests['MC-4231']);
-if (isset($createByName)) {
-    CreateManager::getInstance()->performCreateOperations($createByName);
-}
-if (isset($mismatches)) {
-    UpdateManager::getInstance()->performUpdateOperations($mismatches);
+    if (isset($createByName)) {
+        CreateManager::getInstance()->performCreateOperations($createByName);
+    }
+    if (isset($mismatches)) {
+        UpdateManager::getInstance()->performUpdateOperations($mismatches);
+    }
+    print_r("Finished");
 }
 
+public function dryRunREST()
+{
+    $getZephyr = new GetZephyr();
+    $zephyrTests = $getZephyr->getBothProjects();
+    $parseMFTF = new ParseMFTF();
+    $mftfTestsAll = $parseMFTF->getTestObjects();
+    $zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
+    $zephyrComparison->matchOnIdOrName();
+    $createByName = $zephyrComparison->getCreateArrayByName();
+    $mismatches = $zephyrComparison->getUpdateArray();
+    if (isset($createByName)) {
+        CreateManager::getInstance()->performDryRunCreateOperations($createByName);
+    }
+    if (isset($mismatches)) {
+        UpdateManager::getInstance()->performDryRunUpdateOperations($mismatches);
+    }
+    return "Finished";
+}
 
-print_r("Finished");
+    public function m2Migration()
+    {
+        $getZephyr = new GetZephyr();
+        $m2jql = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped) and status != Closed";
+        $m2ZephyrTests = $getZephyr->jqlPagination($m2jql);
+        // No need to parse MFTF or Compare.
+
+        $m2ZephyrTests = array_slice($m2ZephyrTests, 0, 5);// Only need to format all M2 tests and create
+        CreateManager::getInstance()->performM2Migration($m2ZephyrTests);
+        return "Finished";
+    }
+
+}
+
+$finish = ZephyrIntegrationManager::m2Migration();
+print_r($finish);
