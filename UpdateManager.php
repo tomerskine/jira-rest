@@ -23,16 +23,12 @@ class UpdateManager
         return self::$updateManager;
     }
 
-    public function performUpdateOperations($updates, $skipped) {
-        //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
-        foreach ($updates as $id) {
-            if (array_key_exists($id, $skipped)) {
-                $this->updateSkipped($id);
-            }
-            else {
-                $updateIssue = new UpdateIssue($id);
-                $reponse = $updateIssue::updateIssueREST($id);
-            }
+    public function performUpdateOperations($updates) {
+        foreach ($updates as $key => $update) {
+            $updateIssue = new UpdateIssue($update);
+            $response = $updateIssue::updateDryRunIssuesREST($update, $key);
+            $updateIssue[] = $response;
+            //LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
         }
     }
 
@@ -45,18 +41,11 @@ class UpdateManager
 
     //TODO : REMOVE
     public function performDryRunUpdateOperations($updates) {
-        //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
         foreach ($updates as $key => $update) {
-            // if (array_key_exists($id, $skipped)) {
-//            if (isset($update['skip'])) {
-//                $this->updateDryRunSkipped($update, $key);
-//            }
-//            else {
                 $updateIssue = new UpdateIssue($update);
                 $response = $updateIssue::updateDryRunIssuesREST($update, $key);
                 //$updateIssue[] = $response;
                 //LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('TEST sent to UPDATE: ' . $key);
-//            }
         }
     }
 

@@ -27,7 +27,7 @@ class UpdateIssue {
         $this->toUpdate = $Update;
     }
 
-    function updateIssueREST(){
+    function templateREST(){
         try{
         $issueField = new IssueField(true);
 
@@ -65,22 +65,7 @@ class UpdateIssue {
         return 5;
     }
 
-
-    static function updateRequireTransitionFields($update) {
-        $issueField = new IssueField();
-        $issueField->setIssueType("Test");
-        $issueField->setProjectKey("MC");
-        $issueField->environment = "None";
-        $issueField->resolution = "Done";
-        $issueService = new IssueService();
-
-        // You can set the $paramArray param to disable notifications in example
-        $ret = $issueService->update($update['key'], $issueField);
-        print_r('Updating reqd fields');
-        return $ret;
-    }
-    // TODO : REMOVE
-    static function updateDryRunIssuesREST($update, $key)
+    static function updateIssueREST($update, $key)
     {
         $update += ['key' => $key];
         $issueField = self::buildUpdateIssueField($update);
@@ -117,6 +102,20 @@ class UpdateIssue {
         return $issueField;
     }
 
+    static function updateRequireTransitionFields($update) {
+        $issueField = new IssueField();
+        $issueField->setIssueType("Test");
+        $issueField->setProjectKey("MC");
+        $issueField->environment = "None";
+        $issueField->resolution = "Done";
+        $issueService = new IssueService();
+
+        // You can set the $paramArray param to disable notifications in example
+        $ret = $issueService->update($update['key'], $issueField);
+        print_r('Updating reqd fields');
+        return $ret;
+    }
+
     public static function skipTestStatusTransition($update) {
         $issueKey = $update['key'];
         try {
@@ -147,6 +146,63 @@ class UpdateIssue {
             $ils = new IssueLinkService();
 
             $ret = $ils->addIssueLink($il);
+
+        } catch (JiraException $e) {
+            print("Error Occured! " . $e->getMessage());
+        }
+    }
+
+    static function updateDryRunIssuesREST($update, $key)
+    {
+        $update += ['key' => $key];
+        $issueField = self::buildUpdateIssueField($update);
+        // TODO : Add call to REAL update issue REST call
+        if (isset($update['skip'])) {
+            self::dryRunSkipTestStatusTransition($update);
+            self::dryRunSkipTestLinkIssue($update);
+        }
+        $issueField->setIssueType("Test");
+        $issueField->setProjectKey("MC");
+        $updateLogString = '';
+        foreach($update as $key=>$item) {
+            $updateLogString .= $key.':'.$item. ", \n";
+        }
+        rtrim($updateLogString, ',');
+        LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info('TEST sent to UPDATE : ' . $update['key'] . " : " . $updateLogString . "\n");
+        //LoggingUtil::getInstance()->getLogger(UpdateIssue::class)->info("UPDATE :" . $update['key']
+        //. "\n ");
+    }
+
+    public static function dryRunSkipTestStatusTransition($update) {
+        $issueKey = $update['key'];
+        try {
+            $transition = new Transition();
+            $transition->setTransitionName('Skipped');
+            $transition->setCommentBody('MFTF INTEGRATION - Setting SKIPPED status.');
+
+            $skipTransitionIssueService = new IssueService();
+
+            //$skipTransitionIssueService->transition($issueKey, $transition);
+            //if ($skipTransitionIssueService->http_response == 204) {
+//                print_r("\n" . "SUCCESS! " . $issueKey . " set to status SKIPPED");
+//            }
+        } catch (JiraException $e) {
+            //$this->assertTrue(FALSE, "add Comment Failed : " . $e->getMessage());
+        }
+    }
+
+    public function dryRunSkipTestLinkIssue($update) {
+        try {
+            $il = new IssueLink();
+
+            $il->setInwardIssue($update['skip'])
+                ->setOutwardIssue($update['key'])
+                ->setLinkTypeName('Blocks' )
+                ->setComment('Blocking issue for Skipped test');
+
+            $ils = new IssueLinkService();
+
+            //$ret = $ils->addIssueLink($il);
 
         } catch (JiraException $e) {
             print("Error Occured! " . $e->getMessage());

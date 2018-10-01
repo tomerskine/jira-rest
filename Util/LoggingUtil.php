@@ -67,7 +67,7 @@ class LoggingUtil
 
         if (!array_key_exists($clazz, $this->loggers)) {
             $logger = new JZILogger($clazz);
-            $logger->pushHandler(new StreamHandler($this->getLoggingPath()));
+            $logger->pushHandler(new StreamHandler($this->getLoggingPath($clazz)));
             $this->loggers[$clazz] = $logger;
         }
 
@@ -79,8 +79,16 @@ class LoggingUtil
      *
      * @return string
      */
-    private function getLoggingPath()
+    private function getLoggingPath($clazz)
     {
+        if ($clazz == UpdateIssue::class){
+            return "log/updateIssue.log";
+        }
+        elseif ($clazz == CreateIssue::class) {
+            return "log/createIssue.log";
+    }
+    else {
         return "jzi.log";
+    }
     }
 }

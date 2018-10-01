@@ -56,8 +56,8 @@ class CreateManager
             //LoggingUtil::getInstance()->getLogger(CreateManager::class)->info('NEW TEST sent to CREATE: ' . $mftfLoggingDescriptor);
 
             if (isset($id['skip'])) {
-                $id += ['key' => $reponse];
-                UpdateIssue::skipTestLinkIssue($id);
+                $id += ['key' => $response];
+                //UpdateIssue::skipTestLinkIssue($id);
             }
         }
         return $createdIssueByName;
