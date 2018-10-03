@@ -43,6 +43,7 @@ class transitionIssue
         }
         $requiredTransitons = array_slice($projectMcTransitionStates, $currentStatusOffset+1);
 
+        $time_start = microtime(true);
         foreach ($requiredTransitons as $status) {
             try {
                 $transition = new Transition();
@@ -64,6 +65,9 @@ class transitionIssue
                 //$this->assertTrue(FALSE, "add Comment Failed : " . $e->getMessage());
             }
         }
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
+        print_r("\nTransition to Automated took : " . $time . "\n");
 
     }
 

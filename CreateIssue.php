@@ -95,7 +95,11 @@ class createIssue
         $issueField->fixVersions = [['name' => '2.3.0']];
 
         $issueService = new IssueService();
+        $time_start = microtime(true);
         $ret = $issueService->create($issueField);
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
+        print_r("\n Creating a test took : " . $time . "\n");
         LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info
         ("CREATING REAL REST : " . $issueField->summary . " " . $issueField->description);
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("CREATED ISSUE: " . $ret->key);
@@ -103,6 +107,11 @@ class createIssue
         // transition this newly created issue to AUTOMATED. Newly created status = "Open"
         $status = "Open";
         TransitionIssue::statusTransitionToAutomated($ret->key, $status);
+        if (isset($test['skip'])) {
+            $test += ['key' => $ret->key];
+            updateIssue::skipTestStatusTransition($test);
+            updateIssue::skipTestLinkIssue($test);
+        }
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("NEW ISSUE SET TO AUTOMATED: " . $ret-key);
         return $ret->key;
     }
@@ -213,7 +222,7 @@ class createIssue
         //TransitionIssue::statusTransitionToAutomated($ret->key, $status);
         //LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("NEW ISSUE SET TO AUTOMATED: " . $ret-key);
 //        $test += ['key' => $ret->key];
-        if (isset(test['skip'])) {
+        if (isset($test['skip'])) {
             //updateIssue::skipTestStatusTransition($update);
             //updateIssue::skipTestLinkIssue($update);
             LoggingUtil::getInstance()->getLogger(CreateIssue::class)->info("NEW TEST SET SKIPPED");

@@ -74,19 +74,24 @@ class ZephyrIntegrationManager {
     }
 
 
-public function realRun() {
+public function realScopedToJZIDemo() {
+    $time_start = microtime(true);
     $getZephyr = new GetZephyr();
 //$zephyrTests = $getZephyr->getBothProjects();
 //$jql = "project = MC  and reporter = terskine and issuetype = Test";
     $jql = "project = MC AND issueType = Test AND status in (Automated, Skipped)";
+    $time_start = microtime(true);
     $zephyrTests = $getZephyr->jqlPagination($jql);
+    $time_end = microtime(true);
+    $time = $time_end - $time_start;
+    print_r("\nGetting MC from Zephyr took  : " . $time . "\n");
 //$zephyrTests = $getZephyr->getBothProjects();
     $parseMFTF = new ParseMFTF();
     $mftfTestsAll = $parseMFTF->getTestObjects();
 
     foreach ($mftfTestsAll as $mftfTest) {
-        if (isset($mftfTest['title'])) {
-            if ($mftfTest['title'][0] == "003 - JZI DEMO TITLE SKIP NEW") {
+        if (isset($mftfTest['stories'])) {
+            if ($mftfTest['stories'][0] == "JZI DEMO STORY") {
                 $mftfTests[] = $mftfTest;
             }
         }
@@ -105,7 +110,10 @@ public function realRun() {
     if (isset($mismatches)) {
         UpdateManager::getInstance()->performUpdateOperations($mismatches);
     }
-    print_r("Finished");
+    $time_end = microtime(true);
+    $time = $time_end - $time_start;
+    print_r("\nTOTAL RUN TIME  : " . $time . "\n");
+    return "Finished";
 }
 
 public function dryRunREST()
@@ -139,8 +147,36 @@ public function dryRunREST()
         return "Finished";
     }
 
+    public function realRunmc297() {
+        $getZephyr = new GetZephyr();
+        $time_start = microtime(true);
+        $zephyrTests = $getZephyr->getBothProjects();
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
+        print_r("\nGet all zephyr tests took : " . $time . "\n");
+        $parseMFTF = new ParseMFTF();
+        $mftfTestsAll = $parseMFTF->getTestObjects();
+        $zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
+        $zephyrComparison->matchOnIdOrName();
+        //$createByName = $zephyrComparison->getCreateArrayByName();
+        $mismatches = $zephyrComparison->getUpdateArray();
+        foreach ($mismatches as $key => $mismatch) {
+            if ($key == "MC-297") {
+                    $mc297[$key] = $mismatch;
+                }
+            }
+        if (isset($createByName)) {
+            CreateManager::getInstance()->performCreateOperations($createByName);
+        }
+        if (isset($mc297)) {
+            UpdateManager::getInstance()->performUpdateOperations($mc297);
+        }
+        return "Finished";
+    }
+
 }
 
-//$finish = ZephyrIntegrationManager::m2Migration();
-$finish =ZephyrIntegrationManager::dryRunREST();
+$finish = ZephyrIntegrationManager::m2Migration();
+//$finish =ZephyrIntegrationManager::realRunmc297();
+//$finish = ZephyrIntegrationManager::realScopedToJZIDemo();
 print_r($finish);

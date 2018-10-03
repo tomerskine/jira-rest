@@ -18,6 +18,7 @@ use JiraRestApi\IssueLink\IssueLink;
 use JiraRestApi\IssueLink\IssueLinkService;
 
 include_once ('Util/LoggingUtil.php');
+include_once ('TransitionIssue.php');
 
 class UpdateIssue {
 
@@ -71,6 +72,9 @@ class UpdateIssue {
         $issueField = self::buildUpdateIssueField($update);
         // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
+            if (!($update['status'] == "Automated")) {
+                TransitionIssue::statusTransitionToAutomated($update['key'], $update['status']['name']);
+            }
             self::skipTestStatusTransition($update);
             self::skipTestLinkIssue($update);
         }
@@ -85,7 +89,11 @@ class UpdateIssue {
         $issueService = new IssueService();
 
         // You can set the $paramArray param to disable notifications in example
+        $time_start = microtime(true);
         $ret = $issueService->update($update['key'], $issueField);
+        $time_end = microtime(true);
+        $time = $time_end - $time_start;
+        print_r("\nUpdate took : " . $time . "\n");
         return $ret;
     }
 
@@ -143,14 +151,18 @@ class UpdateIssue {
         try {
             $il = new IssueLink();
 
-            $il->setInwardIssue($update['skip'])
+            $il->setInwardIssue($update['skip'][0])
                 ->setOutwardIssue($update['key'])
                 ->setLinkTypeName('Blocks' )
                 ->setComment('Blocking issue for Skipped test');
 
             $ils = new IssueLinkService();
 
+            $time_start = microtime(true);
             $ret = $ils->addIssueLink($il);
+            $time_end = microtime(true);
+            $time = $time_end - $time_start;
+            print_r("\nSkip Test Issue Link took  : " . $time . "\n");
 
         } catch (JiraException $e) {
             print("Error Occured! " . $e->getMessage());
