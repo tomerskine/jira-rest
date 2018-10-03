@@ -90,14 +90,18 @@ public function realScopedToJZIDemo() {
     $mftfTestsAll = $parseMFTF->getTestObjects();
 
     foreach ($mftfTestsAll as $mftfTest) {
-        if (isset($mftfTest['stories'])) {
-            if ($mftfTest['stories'][0] == "JZI DEMO STORY") {
+        if (isset($mftfTest['title'])) {
+            if ($mftfTest['title'][0] == "005 - JZI CREATE NEW TEST") {
                 $mftfTests[] = $mftfTest;
             }
         }
     }
+    for ($i = 1; $i <= 100; $i++) {
+        $mftfTestOneHundred[$i] = $mftfTests[0];
+        $mftfTestOneHundred[$i]['title'][0] = $mftfTests[0]['title'][0] . $i;
+    }
 //$zephyrComparison = new ZephyrComparison($mftfTestsAll, $zephyrTests);
-    $zephyrComparison = new ZephyrComparison($mftfTests, $zephyrTests);
+    $zephyrComparison = new ZephyrComparison($mftfTestOneHundred, $zephyrTests);
     $zephyrComparison->matchOnIdOrName();
     $createById = $zephyrComparison->getCreateArrayById();
     $createByName = $zephyrComparison->getCreateArrayByName();
@@ -150,7 +154,10 @@ public function dryRunREST()
     public function realRunmc297() {
         $getZephyr = new GetZephyr();
         $time_start = microtime(true);
-        $zephyrTests = $getZephyr->getBothProjects();
+        //$zephyrTests = $getZephyr->getBothProjects();
+        $m2jql = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped) and status != Closed";
+        $singleJql = "issuekey = MC-297";
+        $zephyrTests = $getZephyr->jqlPagination($singleJql);
         $time_end = microtime(true);
         $time = $time_end - $time_start;
         print_r("\nGet all zephyr tests took : " . $time . "\n");
@@ -176,7 +183,7 @@ public function dryRunREST()
 
 }
 
-$finish = ZephyrIntegrationManager::m2Migration();
-//$finish =ZephyrIntegrationManager::realRunmc297();
+//$finish = ZephyrIntegrationManager::m2Migration();
+$finish =ZephyrIntegrationManager::realRunmc297();
 //$finish = ZephyrIntegrationManager::realScopedToJZIDemo();
 print_r($finish);
