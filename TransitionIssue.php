@@ -18,6 +18,10 @@ use JiraRestApi\Issue\Transition;
 //include_once ('../../lesstif/php-jira-rest-client/src/Issue/Transition.php');
 //include_once ('../../lesstif/php-jira-rest-client/src/Issue/IssueService.php');
 
+/**
+ * Class transitionIssue, handles issue transitions in Zephyr
+ * @package Magento\JZI
+ */
 class transitionIssue
 {
 
