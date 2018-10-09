@@ -2,4 +2,7 @@
 *.log
 
 #phpStorm files
-.idea/
+.idea
+
+#vscode files
+.vscode
