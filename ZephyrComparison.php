@@ -5,24 +5,58 @@ include_once ('Util/LoggingUtil.php');
 
 class ZephyrComparison {
 
-	public $mftfTests;
-	// array of test objects as returned from MFTF TestObjectHandler
-	public $zephyrTests;
-	// array of zephyr test data from API call to zephyr
-	public $createArray;
-	// array of tests which do not yet exist in Zephyr so must be created
-	public $toCompare;
-	public $createArrayById;
-	public $createArrayByName;
-	public $mismatches;
-	public $updateCheck;
-	public $skippedTests;
-	public $zephyrStoryTitle;
-	public $updateByName;
-	public $updateById;
-	// array of tests which do exist in Zephyr but need to be compared for updates
-    //public $createArrayByName;
+    /**
+     * 2d array of MFTF tests from ParseMFTF class
+     * @var array
+     */
+    public $mftfTests;
 
+    /**
+     * array of tests returned from Zephyr
+     * @var array 
+     */
+    public $zephyrTests;
+    
+    /**
+     * Array of tests to be created
+     * @var array
+     */
+    public $createArray;
+    
+    /**
+     * array of MFTF test which need to be created in Zephyr
+     * @var array
+     */
+    public $createArrayByName;
+    
+    /**
+     * array of discrepencies found between MFTF and associated Zephyr test
+     * @var array
+     */
+    public $mismatches;
+    
+    /**
+     * array of tests which hae MFTF <skip> annotation set
+     * @var array
+     */
+    public $skippedTests;
+
+    /**
+     * Concatenated string of Story and Title in Zephyr for comparison
+     * @var array
+     */
+    public $zephyrStoryTitle;
+    
+    public $updateByName;
+    
+	public $updateById;
+
+    /**
+     * Constructor for ZephyrComparison
+     * 
+     * @param $mftfTests
+     * @param $zephyrTests
+     */
 	public function __construct($mftfTests, $zephyrTests) {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
@@ -37,6 +71,7 @@ class ZephyrComparison {
         }
     }
 
+    
     public function matchOnIdOrName() {
 	    foreach ($this->mftfTests as $mftfTest) {
 	        if (isset($mftfTest['testCaseId'])) {
@@ -227,10 +262,6 @@ class ZephyrComparison {
     function getSkippedTests() {
 	    return $this->skippedTests;
     }
-//
-//	function gettoCompare(){
-//		return $this->$toCompare;
-//	}
 
 //    public function simpleCompare()
 //    {
