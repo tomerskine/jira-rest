@@ -13,13 +13,29 @@ include_once ('TransitionIssue.php');
 class createIssue
 {
 
+    /**
+     * Test containing all information for issue to be created from MFTF annotations
+     *
+     * @var array
+     */
     public $test;
 
+    /**
+     * createIssue constructor.
+     * @param $id
+     */
     function __construct($id)
     {
         $this->test = $this->defaultMissingFields($id);
     }
 
+    /**
+     * For any missing required fields on a test to be created,
+     * sets default fields
+     *
+     * @param $test
+     * @return array
+     */
     static function defaultMissingFields($test)
     {
         if (!(isset($test['stories']))) {
@@ -74,6 +90,15 @@ class createIssue
 
     }
 
+    /**
+     * Creates an issue in Zephyr from test data
+     * Will transition new issue to Automated status
+     * If test is skipped, will call skip transition and issuelink functions
+     *
+     * @param $test
+     * @return String
+     * @throws \Exception
+     */
     static function createIssuesREST($test)
     {
         $test = self::defaultMissingFields($test);
@@ -116,6 +141,11 @@ class createIssue
         return $ret->key;
     }
 
+    /**
+     * Sets fields and creates new MC zephyr test from MAGETWO zephyr test
+     * @param $zephyrTest
+     * @return String
+     */
     public function createM2Migration($zephyrTest) {
         $test = [];
         if (isset($zephyrTest['description'])) {
@@ -138,27 +168,6 @@ class createIssue
         else {
             $test['severity'] = '4-Minor';
         }
-
-
-//        if (isset($mftfTest['stories']) && isset($zephyrTest['customfield_14364'])) {
-//            if (!($mftfTest['stories'][0] == $zephyrTest['customfield_14364'])) {
-//                $this->mismatches[$key]['stories'] = $mftfTest['stories'][0];
-//            }
-//        }
-//        elseif (isset($mftfTest['stories'])) {
-//            $this->mismatches[$key]['stories'] = $mftfTest['stories'][0];
-//        }
-//
-//        if ((isset($mftfTest['skip'])) && (!($zephyrTest['status']['name'] == "Skipped"))) {
-//            $this->mismatches[$key]['skip'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
-//        }
-//
-//
-//        if (isset($this->mismatches[$key])) {
-//            $this->mismatches[$key]['status'] = $zephyrTest['status']['name'];
-//        }
-
-
 
         $test = self::defaultMissingFields($test);
         $issueField = new IssueField();
@@ -190,6 +199,14 @@ class createIssue
     }
 
     // TODO : REMOVE
+
+    /**
+     * This builds the issueFields for a create call for testing/verification
+     * Does not send any REST request
+     *
+     * @param $test
+     * @throws \Exception
+     */
     static function createDryRunIssuesREST($test)
     {
         $test = self::defaultMissingFields($test);
