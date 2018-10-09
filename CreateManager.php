@@ -14,12 +14,23 @@ include_once ('ZephyrComparison.php');
 include_once ('UpdateIssue.php');
 include_once ('Util/LoggingUtil.php');
 
-
+/**
+ * Class CreateManager, handles all the CREATE requests for new Zephyr tests.
+ */
 class CreateManager
 {
-
+    /**
+     * CreateManager instance.
+     *
+     * @var CreateManager
+     */
     public static $createManager;
 
+    /**
+     * Get CreateManager instance.
+     *
+     * @return CreateManager
+     */
     public static function getInstance() {
         if (!self::$createManager) {
             self::$createManager = new CreateManager();
@@ -30,6 +41,13 @@ class CreateManager
 
     }
 
+    /**
+     * Manages passing data to Create operation and skipping test if necessary
+     *
+     * @param $createByName
+     *
+     * @return array
+     */
     public function performCreateOperations($createByName) {
         //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
         foreach ($createByName as $id) {
@@ -49,12 +67,25 @@ class CreateManager
         return $createdIssueByName;
     }
 
+    /**
+     * create a Skipped test
+     *
+     * @param $id
+     * @return mixed
+     */
     public function createSkipped($id) {
         $createIssue = new CreateIssue($id);
         $response = $createIssue::createSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
         return $response;
     }
 
+    /**
+     * Takes MAGETWO zephyr tests and sends all to Create function
+     *
+     * @param $m2ZephyrTests
+     * @return array
+     * @throws \Exception
+     */
     public function performM2Migration($m2ZephyrTests) {
         foreach ($m2ZephyrTests as $m2Key => $id) {
             // if (array_key_exists($id, $skipped)) {
@@ -75,6 +106,12 @@ class CreateManager
         return $createdIssueByName;
     }
 
+    /**
+     * For M2Migration, this create a link between newly create MC test and the MAGETWO test it was created from
+     *
+     * @param $mcKey
+     * @param $m2Key
+     */
     public function m2MigrationSetIssueLink($mcKey, $m2Key) {
         try {
             $il = new IssueLink();
@@ -94,6 +131,13 @@ class CreateManager
     }
 
     //TODO : REMOVE
+
+    /**
+     * DRY RUN of creation
+     *
+     * @param $createByName
+     * @return array
+     */
     public function performDryRunCreateOperations($createByName) {
         //loop - test for if skipped. if skipped, pass to skipCreate, if not, vanillaCreate
         foreach ($createByName as $id) {
