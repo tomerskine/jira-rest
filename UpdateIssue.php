@@ -20,10 +20,22 @@ use JiraRestApi\IssueLink\IssueLinkService;
 include_once ('Util/LoggingUtil.php');
 include_once ('TransitionIssue.php');
 
+/**
+ * Class UpdateIssue, builds and sends an update REST call
+ * @package Magento\JZI
+ */
 class UpdateIssue {
 
+    /**
+     * Array of data to populate update
+     * @var array
+     */
     public $Update;
 
+    /**
+     * UpdateIssue constructor.
+     * @param $Update
+     */
     function __construct($Update){
         $this->toUpdate = $Update;
     }
@@ -58,14 +70,15 @@ class UpdateIssue {
         }
     }
 
-    function updateSkippedTest($test) {
-        //do skipped
-    }
-
-    function getErrors(){
-        return 5;
-    }
-
+    /**
+     * Builds a REST update from array
+     * Associates against key
+     *
+     * @param array $update
+     * @param string $key
+     * @return object
+     * @throws \Exception
+     */
     static function updateIssueREST($update, $key)
     {
         $update += ['key' => $key];
@@ -97,6 +110,13 @@ class UpdateIssue {
         return $ret;
     }
 
+    /**
+     * Sets the issueField values if they exist in $update
+     * Value exists in $update only if it differs from existing zephyr data and requires update
+     *
+     * @param array $update
+     * @return IssueField
+     */
     public static function buildUpdateIssueField($update) {
         $issueField = new IssueField();
         if (isset($update['title'])) {
@@ -115,6 +135,12 @@ class UpdateIssue {
         return $issueField;
     }
 
+    /**
+     * Function that sets additional fields required for transition to AUTOMATED
+     *
+     * @param array $update
+     * @return array
+     */
     static function updateRequireTransitionFields($update) {
         $issueField = new IssueField();
         $issueField->setIssueType("Test");
@@ -129,6 +155,11 @@ class UpdateIssue {
         return $ret;
     }
 
+    /**
+     * Transitions an issue to SKIPPED status
+     *
+     * @param array $update
+     */
     public static function skipTestStatusTransition($update) {
         $issueKey = $update['key'];
         try {
@@ -147,6 +178,11 @@ class UpdateIssue {
         }
     }
 
+    /**
+     * Sets an issueLink to the blocking issue for SKIPPED test
+     *
+     * @param array $update
+     */
     public function skipTestLinkIssue($update) {
         try {
             $il = new IssueLink();
