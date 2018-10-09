@@ -8,13 +8,20 @@ require(__DIR__ . "/../../../vendor/autoload.php");
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 
+/**
+ * Class GetZephyr
+ * @package Magento\JZI
+ */
 class GetZephyr {
 
-    public $zephyrID;
-
-//	function __construct($zephyrID){
-//	    $this->zephyrID = $zephyrID;
-//    }
+    /**
+     * Recursive fucntion which takes object and returns array of values
+     *
+     * @param $object
+     * @param int $assoc
+     * @param string $empty
+     * @return array
+     */
     public function object_to_array_recursive ( $object, $assoc=1, $empty='' )
     {
         $out_arr = array();
@@ -131,6 +138,15 @@ class GetZephyr {
             return $zephyrTests;
     }
 
+    /**
+     * Gets jql results via pagination
+     * Current Jira instance returns max of 2000 issues
+     * Function gets page of results, then gets next page and appends data
+     * Current page size $maxresult = 100 to prevent timeouts on queries
+     *
+     * @param $jql
+     * @return array
+     */
     public function jqlPagination($jql) {
         try {
             $issueService = new IssueService();
@@ -180,6 +196,12 @@ class GetZephyr {
         return $zephyrIDs;
     }
 
+    /**
+     * Gets tests from two jql queries
+     * Gets tests from both MC and MAGETWO projects
+     *
+     * @return array
+     */
     public function getBothProjects() {
         $jqlMAGETWO = "project = MAGETWO and issuetype = test and 'Automation Status' in (Automated, Skipped)";
         $jqlMC = "project = MC AND issueType = Test AND status in (Automated, Skipped)";
