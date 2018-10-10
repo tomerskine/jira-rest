@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: terskine
- * Date: 9/16/18
- * Time: 8:12 PM
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
  */
 
 namespace Magento\JZI;
