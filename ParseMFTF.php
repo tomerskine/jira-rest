@@ -20,6 +20,12 @@ class ParseMFTF {
             $propGetter = Closure::bind(function($prop){return $this->$prop;}, $test, $test );
             $annotations[] = $propGetter('annotations');
         }
+        foreach ($annotations as &$annotation) {
+            if (isset($annotation['title'])) {
+                $annotation['title'][0] = trim(substr($annotation['title'][0], strpos($annotation['title'][0], ":") + 1));
+                print($annotation['title'][0]);
+            }
+        }
 //        foreach ($annotations as $annotation) {
 //            if (isset($annotation['title'])){
 //                print_r($annotation['title']);
