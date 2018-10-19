@@ -65,7 +65,7 @@ class ZephyrComparison {
 	    $this->mftfTests = $mftfTests;
 	    $this->zephyrTests = $zephyrTests;
 	    $this->checkForSkippedTests();
-        foreach ($this->zephyrTests as $key => $zephyrTest) { // TODO - if test doesnt have story set, it my be created bc no match. Need to exclude from CREATE bc no story to match on.
+        foreach ($this->zephyrTests as $key => $zephyrTest) {
             if (isset($zephyrTest['customfield_14364'])) {
                 $this->zephyrStoryTitle[$key] = $zephyrTest['customfield_14364'] . $zephyrTest['summary'];
             }
@@ -103,7 +103,6 @@ class ZephyrComparison {
         if (!(array_key_exists($mftfTestCaseId, $this->zephyrTests))) { // IF we can't find the MFTF testCaseID in the zephyr Tests array
             //$this->createArrayById[] = $mftfTest;
             //Array of MFTF tests which have a TestCaseId annotation but the value does not match anything in Zephyr
-            //TODO : Resolve this issue. Should this be passed only to the update flow?
             LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn($mftfTestCaseId .
                 ' exists as TestCaseId annotation but can not be found in Zephyr. 
                 No Integration functions will be run');
@@ -130,7 +129,7 @@ class ZephyrComparison {
                 $this->testDataComparison($mftfTest, $this->zephyrTests[$storyTitleMatch], $storyTitleMatch);
             }
             else {
-                // TODO - DO NOT create anything that doesnt have story set (cf_14364)
+                // TODO - DO NOT create anything that doesn't have story set (cf_14364)
                 if (isset($mftfTest['severity'])) {
                     $mftfTest['severity'][0] = $this->transformSeverity($mftfTest['severity'][0]);
                 }
@@ -139,7 +138,7 @@ class ZephyrComparison {
         }
         else {
             $mftfLoggingDescriptor = self::mftfLoggingDescriptor($mftfTest);
-            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfLoggingDescriptor);
+            LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('MFTF TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfLoggingDescriptor);
         }
 
     }
@@ -206,7 +205,7 @@ class ZephyrComparison {
         }
 
         if ((isset($mftfTest['skip'])) && (!($zephyrTest['status']['name'] == "Skipped"))) {
-            $this->mismatches[$key]['skip'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
+            $this->mismatches[$key]['skip'] = $mftfTest['skip'][0];
         }
         if (!(isset($mftfTest['skip'])) && ($zephyrTest['status']['name'] == "Skipped")) {
             $this->mismatches[$key]['unskip'] = TRUE;
