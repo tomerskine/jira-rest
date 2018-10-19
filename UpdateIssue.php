@@ -89,6 +89,9 @@ class UpdateIssue {
             self::skipTestStatusTransition($update);
             self::skipTestLinkIssue($update);
         }
+        if ($update['unskip']) {
+            TransitionIssue:unskip($update['key']);
+        }
         $issueField->setIssueType("Test");
         $issueField->setProjectKey("MC");
         $updateLogString = '';
