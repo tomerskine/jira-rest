@@ -138,7 +138,6 @@ class ZephyrComparison {
             }
         }
         else {
-            //$this->updateCheck[] = $mftfTest; // TODO : LOG and handle this case - mftf test did not have both Story and Title set
             $mftfLoggingDescriptor = self::mftfLoggingDescriptor($mftfTest);
             LoggingUtil::getInstance()->getLogger(ZephyrComparison::class)->warn('TEST MISSING STORY OR TITLE ANNOTATIONS: ' . $mftfLoggingDescriptor);
         }
