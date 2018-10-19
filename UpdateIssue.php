@@ -81,7 +81,6 @@ class UpdateIssue {
     {
         $update += ['key' => $key];
         $issueField = self::buildUpdateIssueField($update);
-        // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
             if (!($update['status'] == "Automated")) {
                 TransitionIssue::statusTransitionToAutomated($update['key'], $update['status']['name']);
@@ -207,7 +206,6 @@ class UpdateIssue {
     {
         $update += ['key' => $key];
         $issueField = self::buildUpdateIssueField($update);
-        // TODO : Add call to REAL update issue REST call
         if (isset($update['skip'])) {
             self::dryRunSkipTestStatusTransition($update);
             self::dryRunSkipTestLinkIssue($update);

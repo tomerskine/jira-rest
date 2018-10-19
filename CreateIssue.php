@@ -64,13 +64,13 @@ class createIssue
         try {
             $issueField = new IssueField();
 
-            $issueField->setProjectKey($test['Project'])//TODO: No project in MFTF array
+            $issueField->setProjectKey($test['Project']) //Project not currently recorded in MFTF data
             ->setSummary($test['title'][0])// Use Title from MFTF array
-            ->setAssigneeName($test['AssigneeName'])// TODO: choose assignee
+            ->setAssigneeName($test['AssigneeName'])
             ->setIssueType('Test')// OK
             ->setDescription($test['description'][0])// OK
             // ->addVersion($test['version']) // version?
-            // ->addComponents(['', '']) // MFTF does not record Components -- TODO: is component used for reporting?
+            // ->addComponents(['', '']) // MFTF does not record Components --
             // set issue security if you need.
             //->setSecurityId(10001 /* security scheme id */)
             //->setDueDate('')
@@ -78,7 +78,7 @@ class createIssue
             // Add custom Field mappings
             ->addCustomField('customfield_14364', $test['stories'][0])
                 ->addCustomField('customfield_14362', implode("', '", $test['group'][0]))// have to implode any customfield that will use multiple values (strings)
-                ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])// TODO: for any customfields taking LIST, need to ['value' => 'foo'] and [ ['value => 'foo'], ['value' => 'bar'] ] or multiple list selections
+                ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])
             ;
 
             $issueService = new IssueService();
@@ -108,19 +108,18 @@ class createIssue
         $test = self::defaultMissingFields($test);
         $issueField = new IssueField();
 
-        $issueField->setProjectKey('MC')//TODO: No project in MFTF array
-        ->setSummary($test['title'][0])// Use Title from MFTF array
-        ->setAssigneeName('terskine')// TODO: choose assignee
+        $issueField->setProjectKey('MC')
+        ->setSummary($test['title'][0])
+        ->setAssigneeName('terskine') //TODO: change to auth user
         ->setIssueType('Test')// OK
         ->setDescription($test['description'][0])// OK
         //->addVersion('2.3.0') // version?
-        ->addComponents('Module/ Catalog')// MFTF does not record Components -- TODO: is component used for reporting?
+        ->addComponents('Module/ Catalog')// MFTF does not record Components --
         ->addCustomField('customfield_14364', $test['stories'][0])
-            ->addCustomField('customfield_14362', ['value' => 'Catalog'])// have to implode any customfield that will use multiple values (strings)
-            // TODO: group value doesnt match to anything in MC. Will have to ignore and find default value from single select dropdown (like 'severity' field below)
-            ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])// TODO: for any customfields taking LIST, need to ['value' => 'foo'] and [ ['value => 'foo'], ['value' => 'bar'] ] or multiple list selections
+            ->addCustomField('customfield_14362', ['value' => 'Catalog'])// TODO: Read from directory structure
+            ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])
             ->addCustomField('customfield_13324', ['value' => 'MFTF Test']);
-        //$issueField->fixVersions = [['id'=>'18972']];
+        //$issueField->fixVersions = [['id'=>'18972']]; // TODO versioning
         $issueField->fixVersions = [['name' => '2.3.0']];
 
         $issueService = new IssueService();
@@ -178,15 +177,14 @@ class createIssue
 
         $issueField->setProjectKey('MC')//TODO: No project in MFTF array
         ->setSummary($test['title'][0])// Use Title from MFTF array
-        ->setAssigneeName('terskine')// TODO: choose assignee
+        ->setAssigneeName('terskine')// TODO: set to QA_API
         ->setIssueType('Test')// OK
         ->setDescription($test['description'][0])// OK
-        //->addVersion('2.3.0') // version?
+        //->addVersion('2.3.0') // TOOD versioning
         ->addComponents('Module/ Catalog')// MFTF does not record Components -- TODO: is component used for reporting?
         ->addCustomField('customfield_14364', $test['stories'][0])
             ->addCustomField('customfield_14362', ['value' => 'Catalog'])// have to implode any customfield that will use multiple values (strings)
-            // TODO: group value doesnt match to anything in MC. Will have to ignore and find default value from single select dropdown (like 'severity' field below)
-            ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])// TODO: for any customfields taking LIST, need to ['value' => 'foo'] and [ ['value => 'foo'], ['value' => 'bar'] ] or multiple list selections
+            ->addCustomField('customfield_12720', ['value' => $test['severity'][0]])
             ->addCustomField('customfield_13324', ['value' => 'MFTF Test']);
         //$issueField->fixVersions = [['id'=>'18972']];
         $issueField->fixVersions = [['name' => '2.3.0']];

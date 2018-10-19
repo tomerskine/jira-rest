@@ -6,7 +6,6 @@
 
 namespace Magento\JZI;
 
-//TODO: clean up autoload to avoid hardcoding dir traversal
 //require(__DIR__ . "/../../../../../autoload.php");
 
 use \Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;

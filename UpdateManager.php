@@ -51,7 +51,7 @@ class UpdateManager
     public function updateDryRunSkipped($id, $key) {
         //$updateIssue = new UpdateIssue($id);
         LoggingUtil::getInstance()->getLogger(UpdateManager::class)->info('SKIPPED TEST sent to UPDATE: ' . $key);
-        //$response = $createIssue::createDryRunSkippedTest($id); //TODO: create createSkippedTest method in CreateIssue class
+        //$response = $createIssue::createDryRunSkippedTest($id);
         //return $response;
     }
 
