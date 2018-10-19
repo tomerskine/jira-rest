@@ -184,7 +184,9 @@ class ZephyrComparison {
         if ((isset($mftfTest['skip'])) && (!($zephyrTest['status']['name'] == "Skipped"))) {
             $this->mismatches[$key]['skip'] = $mftfTest['skip'][0]; // TODO : do we need to handle multiple skip associated Ids?
         }
-
+        if (!(isset($mftfTest['skip'])) && ($zephyrTest['status']['name'] == "Skipped")) {
+            $this->mismatches[$key]['unskip'] = TRUE;
+        }
 
         if (isset($this->mismatches[$key])) {
             $this->mismatches[$key]['status'] = $zephyrTest['status']['name'];

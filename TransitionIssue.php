@@ -73,7 +73,20 @@ class transitionIssue
 
     }
 
+
+    public static function unskip($key) {
+        try {
+            $transition = new Transition();
+            $transition->setTransitionName('Automated');
+            $transition->setCommentBody('MFTF INTEGRATION - UNSKIPPING.');
+            $skipTransitionIssueService = new IssueService();
+            $skipTransitionIssueService->transition($key, $transition);
+            //if ($skipTransitionIssueService->http_response == 204) {
+//                print_r("\n" . "SUCCESS! " . $issueKey . " set to status SKIPPED");
+//            }
+        } catch (JiraException $e) {
+            //$this->assertTrue(FALSE, "add Comment Failed : " . $e->getMessage());
+        }
+    }
 }
 
-//$empty = [];
-//TransitionIssue::statusTransitionToAutomated($empty);
